@@ -6,7 +6,6 @@
 <title>MOCHI MARKET & NEWS</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- 🌟 깜빡임 방지: 페이지 로딩 전 다크모드 설정 불러오기 -->
 <script>
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -81,7 +80,7 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .theme-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 10px; border-radius: 50%; transition: transform 0.3s ease; display: flex; align-items: center; justify-content: center; }
 .theme-btn:hover { transform: scale(1.1) rotate(15deg); background: var(--bg-hover); }
 
-/* 스크롤바 숨기기 (모바일 스와이프 용) */
+/* 스크롤바 숨기기 */
 .top-nav::-webkit-scrollbar, .tabs::-webkit-scrollbar, .cat-tabs::-webkit-scrollbar, .table-responsive::-webkit-scrollbar { display: none; }
 
 /* 🌟 전체 레이아웃 (사이드바 + 메인) */
@@ -109,7 +108,8 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .rank-num.rank-1 { background: #ffd32a; color: #fff; box-shadow: 0 4px 10px rgba(255, 211, 42, 0.4); }
 .rank-num.rank-2 { background: #d2dae2; color: #fff; }
 .rank-num.rank-3 { background: #cd6133; color: #fff; }
-.rank-name { font-weight:700; font-size:14.5px; line-height: 1.3; color:var(--text-main); transition: color 0.3s; }
+/* 💡 아이템 이름이 구겨지지 않게 word-break: keep-all 추가 */
+.rank-name { font-weight:700; font-size:14.5px; line-height: 1.3; color:var(--text-main); transition: color 0.3s; word-break: keep-all; }
 .rank-count { margin-left:auto; font-size:13px; color:var(--text-muted); font-weight: 600; white-space: nowrap; transition: color 0.3s; }
 
 /* 🌟 홈 화면 히어로 디자인 (슬라이드쇼) */
@@ -194,11 +194,11 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .i-price { min-width:110px; text-align:right; color:var(--pink-main); font-size:16px; font-weight:900; white-space:nowrap; }
 .tab-btn span { font-size:14px; font-weight:700; opacity:.9; }
 
-/* 표 모바일 스와이프를 위한 래퍼(Wrap) */
+/* 표 CSS */
 .table-responsive { max-height: 400px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border-main); border-radius: 16px; transition: border-color 0.3s; -webkit-overflow-scrolling: touch; }
-table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14.5px; min-width: 650px; /* 테이블 최소 너비 보장 */ }
+table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14.5px; min-width: 650px; }
 table thead { background: var(--bg-table-head); color: var(--text-sub); transition: background 0.3s, color 0.3s; position: sticky; top: 0;}
-table th, table td { padding: 16px; white-space: nowrap; /* 글씨 줄바꿈(구겨짐) 방지 */ }
+table th, table td { padding: 16px; white-space: nowrap; }
 table th { border-bottom: 2px solid var(--border-main); }
 table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
@@ -216,38 +216,32 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 
 /* =======================================================
-   📱 모바일 완벽 최적화 (앱 UI/UX 방식 적용)
+   📱 모바일 완벽 최적화
 ======================================================== */
 @media (max-width: 768px) {
-    /* 1. 상단 헤더 및 네비게이션 가로 스와이프 */
     header { flex-direction: row; height: auto; padding: 15px 20px 0; }
     .logo { flex: 1; font-size: 22px; }
     .theme-btn { margin-left: auto; padding: 5px; }
     .top-nav { width: 100%; justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border-main); margin-top: 10px; padding-top: 5px; gap: 10px; }
     .top-nav a { font-size: 15px; padding: 12px 10px; }
     
-    /* 2. 콘텐츠 우선! 사이드바는 스크롤 맨 아래로 이동 */
     .layout { display: flex; flex-direction: column; margin: 15px auto; padding: 0 15px; gap: 25px; min-height: auto; }
     main { order: 1; }
     .sidebar { order: 2; position: static; height: auto; }
     
-    /* 3. 히어로 배너 및 카드 */
     .hero { padding: 45px 25px; border-radius: 20px; margin-bottom: 20px; }
     .hero-content h1 { font-size: 32px; }
     .home-cards { grid-template-columns: 1fr; gap: 15px; }
     .h-card { min-height: 190px; padding: 30px 25px; }
     
-    /* 4. 시세 탭 버튼 스와이프화 */
     .tabs { flex-direction: row; overflow-x: auto; white-space: nowrap; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
     .tab-btn { flex: 0 0 auto; padding: 16px 20px; font-size: 16px; }
     .tab-btn span { display: none; } 
     
-    /* 5. 아이템 검색, 기간 필터 최적화 */
     .search-container { flex-direction: column; gap: 10px; margin-bottom: 15px; }
     .search-input { width: 100%; padding: 15px; font-size: 15px; }
     .search-btn { width: 100%; padding: 15px; font-size: 16px; }
     
-    /* 💡 기간 필터 버튼(일,주,월) 잘리지 않게 1/3씩 꽉 채워 분할 */
     .period-filter-area { gap: 6px; }
     .period-filter-area .cat-btn { flex: 1; padding: 12px 0; font-size: 13.5px; text-align: center; white-space: nowrap; min-width: 0; }
     
@@ -256,14 +250,12 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     .cat-content.active { grid-template-columns: 1fr; gap: 12px; }
     .item-card { padding: 18px; }
     
-    /* 6. 차트 높이 축소 */
     .chart-container { height: 220px; margin-bottom: 20px; }
 
     .news-list { grid-template-columns: 1fr; gap: 15px; }
     .news-card { padding: 20px; }
     .n-img { height: 160px; }
     
-    /* 7. 모달(팝업) 크기 조절 */
     .modal-box { width: 95%; padding: 25px 20px; max-height: 85vh; border-radius: 20px; }
     #modal-title { font-size: 22px !important; margin-bottom: 15px !important; }
     .modal-edit-btn { top: 15px; right: 55px; padding: 6px 12px; font-size: 13px; }
@@ -271,7 +263,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     .modal-text { padding: 20px; font-size: 14.5px; }
     .tab-content { padding: 20px 15px; border-radius: 20px; }
 
-    /* 8. 푸터 모바일 정렬 */
     .footer-content { grid-template-columns: 1fr; gap: 30px; text-align: center; }
     .footer-col { align-items: center; }
     .site-footer { padding: 40px 20px 25px; margin-top: 40px; }
@@ -282,7 +273,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 <header>
     <div class="logo">🐱 모찌 소식</div>
-    <!-- 다크 모드 토글 -->
     <button id="darkModeToggle" class="theme-btn" onclick="toggleDarkMode()" title="다크 모드 전환">🌙</button>
     
     <nav class="top-nav">
@@ -294,7 +284,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 <div class="layout">
     <aside class="sidebar">
-        <!-- 누적 거래 현황 -->
         <div class="side-box">
             <div class="side-title">누적 거래 현황 <span class="badge">최근 7일</span></div>
             <div class="summary-item"><span>총 거래 건수</span><strong id="summary-count">- 건</strong></div>
@@ -302,7 +291,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
             <div class="summary-item"><span>평균 거래 단가</span><strong id="summary-avg">- 원</strong></div>
         </div>
 
-        <!-- 인기 거래 TOP 10 -->
         <div class="side-box">
             <div class="side-title">🔥 인기 거래 TOP 10 <span class="badge-blue">최근 2주</span></div>
             <ul class="rank-list" id="sidebar-rank-list"></ul>
@@ -312,7 +300,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     <main>
         <div id="page-home" class="page-section active">
             
-            <!-- 슬라이드쇼 히어로 배너 -->
             <section class="hero">
                 <div id="heroSliderBg"></div>
                 <div class="hero-overlay"></div>
@@ -423,7 +410,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
                     <canvas id="searchChart"></canvas>
                 </div>
 
-                <!-- 🌟 표 가로 스크롤 허용 🌟 -->
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -454,7 +440,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     </main>
 </div>
 
-<!-- 🌟 푸터 (Footer) 영역 -->
 <footer class="site-footer">
     <div class="footer-content">
         <div class="footer-col">
@@ -478,7 +463,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     </div>
 </footer>
 
-<!-- 팝업창 (모달) -->
 <div id="newsModal" class="modal-overlay" onclick="closeNewsModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeNewsModal()">×</span>
@@ -739,8 +723,9 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
                 html += `<div style="padding:40px; text-align:center; color:var(--text-muted); grid-column: 1 / -1; font-weight:600;">해당 카테고리의 거래 내역이 없습니다.</div>`;
             } else {
                 cats[c].forEach(item => {
+                    // 🔥 data-name으로 이름을 안전하게 숨겨서 가져가도록 수정! 🔥
                     html += `
-                    <div class="item-card" onclick="goToSearch('${item.name}')" title="클릭하여 상세 검색으로 이동">
+                    <div class="item-card" onclick="goToSearch(this.getAttribute('data-name'))" data-name="${item.name}" title="클릭하여 상세 검색으로 이동">
                         <div>
                             <div class="i-name">${item.name}</div>
                             <div style="font-size:13px; color:var(--text-muted); margin-top:6px; font-weight:600;">총 ${item.count}번 거래됨</div>
@@ -774,8 +759,9 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
         } else {
             sortedItems.forEach((item, index) => {
                 let rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
+                // 🔥 랭킹도 동일하게 data-name으로 수정! 🔥
                 html += `
-                <li class="rank-item" onclick="goToSearch('${item.name}')" title="클릭하여 상세 시세 보기">
+                <li class="rank-item" onclick="goToSearch(this.getAttribute('data-name'))" data-name="${item.name}" title="클릭하여 상세 시세 보기">
                     <div class="rank-num ${rankClass}">${index + 1}</div>
                     <div class="rank-name">${item.name}</div>
                     <div class="rank-count">거래 ${item.count}건</div>
@@ -785,11 +771,21 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
         rankList.innerHTML = html;
     }
 
+    // 🌟 버튼 한 방으로 화면이 넘어가도록 완벽 수리된 함수 🌟
     function goToSearch(itemName) {
+        // 1. 숨어있는 '시세 조회' 탭 전체를 화면에 먼저 보여줍니다.
+        const marketPageBtn = document.querySelectorAll('.nav-link')[2];
+        switchPage('page-market', marketPageBtn);
+
+        // 2. 그 안에서 '상세 시세 검색' 메뉴를 누른 것처럼 활성화합니다.
         const searchBtn = document.querySelectorAll('.tab-btn')[1];
         switchTab('tab-search', searchBtn);
+        
+        // 3. 검색창에 아이템 이름을 넣고 검색을 시작합니다.
         document.getElementById('searchInput').value = itemName;
         searchItem();
+        
+        // 4. 모바일에서도 결과가 바로 보이도록 스크롤을 살짝 내려줍니다.
         document.getElementById('page-market').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -902,7 +898,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
                 plugins: { tooltip: { backgroundColor: 'rgba(255, 107, 166, 0.9)', titleFont: {size:14}, bodyFont: {size:15, weight:'bold'}, callbacks: { label: function(c) { return "평균 단가: " + formatKRW(c.raw); } } } },
                 scales: { 
                     y: { border: {dash: [4, 4]}, grid: {color: gridColor}, ticks: { font: {weight: 'bold', color: tickColor}, callback: function(v) { return formatKRW(v); } } },
-                    // 🌟 모바일 X축 라벨 겹침 방지 (maxTicksLimit) 🌟
                     x: { border: {display: false}, grid: {display: false}, ticks: { maxTicksLimit: window.innerWidth < 768 ? 5 : 10, maxRotation: 45, font: {weight: 'bold', color: tickColor} } }
                 }
             }
