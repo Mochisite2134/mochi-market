@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>MOCHI MARKET</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
@@ -76,6 +76,53 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
 .cat-content{display:none;}
 .cat-content.active{display:block;}
 th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
+
+/* =========================================
+   📱 모바일 최적화 (반응형 웹 디자인) 추가!
+========================================= */
+@media (max-width: 768px) {
+    /* 헤더 및 네비게이션 모바일 맞춤 */
+    header { flex-direction: column; height: auto; padding: 15px 20px 0; gap: 15px; }
+    .top-nav { width: 100%; justify-content: space-between; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
+    .top-nav a { padding: 10px 5px; font-size: 15px; }
+
+    /* 레이아웃 구조 변경 (사이드바를 아래로 이동) */
+    .layout { display: flex; flex-direction: column; padding: 0 15px; margin: 15px auto; gap: 20px; }
+    main { order: 1; }
+    .sidebar { order: 2; position: relative; top: 0; margin-bottom: 20px; }
+
+    /* 홈 화면 (히어로 및 카드) 모바일 맞춤 */
+    .hero { padding: 40px 20px; border-radius: 16px; }
+    .hero h1 { font-size: 28px; }
+    .hero p { font-size: 14px; word-break: keep-all; }
+    .home-cards { grid-template-columns: 1fr; gap: 15px; }
+    .h-card { padding: 30px 20px; }
+
+    /* 매거진(뉴스) 모바일 맞춤 */
+    .news-card { padding: 20px; border-radius: 16px; }
+    .n-title { font-size: 18px; }
+    .n-content { font-size: 14px; padding: 15px; }
+
+    /* 시세 조회 탭 및 버튼 모바일 맞춤 */
+    .tabs { flex-direction: column; gap: 10px; }
+    .tab-btn { padding: 15px; font-size: 16px; flex-direction: row; justify-content: center; }
+    .tab-btn span { display: none; /* 모바일에서는 부가설명 숨김 처리로 깔끔하게 */ }
+    .cat-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
+    .cat-btn { padding: 10px; font-size: 13px; }
+    .tab-content { padding: 20px 15px; border-radius: 16px; }
+
+    /* 검색창 모바일 맞춤 */
+    #tab-search > div:first-of-type { flex-direction: column; }
+    #tab-search input, #tab-search button { width: 100%; padding: 15px; }
+
+    /* 아이템 리스트 모바일 맞춤 */
+    .item-card { flex-direction: column; align-items: flex-start; gap: 8px; }
+    .i-price { align-self: flex-end; font-size: 16px; }
+
+    /* 테이블 모바일 스크롤 지원 */
+    #tab-search > div:nth-of-type(3) { overflow-x: auto; white-space: nowrap; }
+    table { min-width: 650px; }
+}
 </style>
 </head>
 <body>
@@ -128,7 +175,6 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
                 </div>
             </div>
 
-            <!-- ▼ 추가된 공식 사이트 및 운영팀 링크 카드 영역 ▼ -->
             <div class="home-cards" style="margin-top: 20px;">
                 <a href="https://www.mochi.me.kr/team" target="_blank" class="h-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: center; border-color: #fef08a;">
                     <h3 style="color: #eab308;">⭐ 모찌 운영팀</h3>
@@ -141,8 +187,7 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
                     <span style="color: #3b82f6; font-weight: bold;">공식 홈페이지 방문 👉</span>
                 </a>
             </div>
-            <!-- ▲ 추가 영역 끝 ▲ -->
-        </div>
+            </div>
 
         <div id="page-news" class="page-section">
             <h2 style="margin-bottom:20px; font-size:24px;">📰 모찌 매거진 최신 뉴스</h2>
