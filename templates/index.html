@@ -66,7 +66,7 @@
     --rank-bg: #334155;
 }
 
-/* 🌟 기본 리셋 및 부드러운 화면 전환(Transition) */
+/* 🌟 기본 리셋 */
 *{margin:0;padding:0;box-sizing:border-box; -webkit-user-select: none; user-select: none;}
 input, textarea { -webkit-user-select: auto; user-select: auto; }
 body { font-family:'Pretendard',sans-serif; background:var(--bg-body); color:var(--text-main); line-height: 1.5; transition: background 0.3s ease, color 0.3s ease; }
@@ -78,13 +78,11 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .top-nav a { text-decoration:none; font-size:17px; font-weight:700; color:var(--text-sub); cursor:pointer; padding:25px 0; border-bottom:3px solid transparent; transition:all 0.3s ease; }
 .top-nav a:hover { color:var(--pink-main); }
 .top-nav a.active { color:var(--pink-main); border-bottom:3px solid var(--pink-main); }
-
-/* 테마 변경 버튼 */
 .theme-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 10px; border-radius: 50%; transition: transform 0.3s ease; display: flex; align-items: center; justify-content: center; }
 .theme-btn:hover { transform: scale(1.1) rotate(15deg); background: var(--bg-hover); }
 
 /* 🌟 전체 레이아웃 (사이드바 + 메인) */
-.layout { max-width:1440px; margin:35px auto; padding:0 25px; display:grid; grid-template-columns:320px 1fr; gap:35px; }
+.layout { max-width:1440px; margin:35px auto; padding:0 25px; display:grid; grid-template-columns:320px 1fr; gap:35px; min-height: 80vh; }
 .sidebar { display:flex; flex-direction:column; gap:25px; height:fit-content; position:sticky; top:110px; }
 
 /* 🌟 사이드바: 박스 디자인 */
@@ -111,7 +109,7 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .rank-name { font-weight:700; font-size:14.5px; line-height: 1.3; color:var(--text-main); transition: color 0.3s; }
 .rank-count { margin-left:auto; font-size:13px; color:var(--text-muted); font-weight: 600; white-space: nowrap; transition: color 0.3s; }
 
-/* 🌟 홈 화면 히어로(대문) 디자인 */
+/* 🌟 홈 화면 히어로 디자인 (슬라이드쇼) */
 .hero { position: relative; padding:90px 50px; border-radius:30px; margin-bottom:30px; box-shadow:0 15px 40px var(--shadow-medium); text-align: left; overflow: hidden; }
 #heroSliderBg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
 .hero-slide { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; opacity: 0; transition: opacity 1s ease-in-out; }
@@ -129,7 +127,6 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .h-card p { font-size:15px; line-height:1.6; opacity: 0.95; margin-bottom: 15px; font-weight: 500; }
 .h-card span { font-weight: 800; font-size: 15px; display: inline-block; background: rgba(255,255,255,0.25); padding: 8px 16px; border-radius: 12px; backdrop-filter: blur(5px); }
 
-/* 사진 배경 세팅 */
 .bg-news { background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.85)), url('https://cdn.domi.kr/tkRy9SMEuIku2ts1yK4B6tXZg3Pk5J.png') center/cover; }
 .bg-interview { background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.85)), url('https://cdn.domi.kr/FrvZXcyyBCO25dY5mfxQrWqdkqWQwm.png') center/cover; }
 .bg-team { background: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.85)), url('https://cdn.domi.kr/W7OPQYrvCfeI1nzX7hzr2gPD6q09Nu.png') center/cover; }
@@ -145,7 +142,7 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .n-content-preview { font-size:14.5px; color:var(--text-sub); line-height:1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1; }
 .n-img { width:100%; height:190px; object-fit:cover; border-radius:16px; margin-bottom:18px; background:var(--border-main); }
 
-/* 🌟 집중 모드 팝업창 (모달) */
+/* 🌟 팝업창 (모달) */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
 .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
 .modal-box { background: var(--bg-card); width: 90%; max-width: 680px; border-radius: 28px; padding: 45px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-main); transition: background 0.3s, border-color 0.3s;}
@@ -181,10 +178,21 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .item-card:hover { border-color:var(--pink-main); transform:translateY(-4px); box-shadow:0 10px 25px var(--pink-light); }
 .i-name { font-size:16px; font-weight:900; color:var(--text-main); line-height:1.35; word-break:keep-all; }
 .i-price { min-width:110px; text-align:right; color:var(--pink-main); font-size:16px; font-weight:900; white-space:nowrap; }
-.tab-btn span { font-size:14px; font-weight:700; opacity:.9; }
 
 table thead { background: var(--bg-table-head); color: var(--text-sub); transition: background 0.3s, color 0.3s;}
 table th { border-bottom: 2px solid var(--border-main); }
+
+/* 🌟 푸터 (하단 영역) CSS 🌟 */
+.site-footer { background: var(--bg-card); border-top: 1px solid var(--border-main); padding: 50px 40px 30px; margin-top: 60px; transition: background 0.3s, border-color 0.3s; }
+.footer-content { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
+.footer-col { display: flex; flex-direction: column; gap: 15px; }
+.footer-logo { font-size: 20px; font-weight: 900; color: var(--pink-main); letter-spacing: -0.5px; margin-bottom: 5px; }
+.footer-col p { color: var(--text-sub); font-size: 14.5px; line-height: 1.6; transition: color 0.3s; font-weight: 500; }
+.footer-col h4 { font-size: 16px; font-weight: 800; color: var(--text-main); transition: color 0.3s; }
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+.footer-col ul li a { text-decoration: none; color: var(--text-sub); font-size: 14.5px; transition: color 0.2s; font-weight: 600; }
+.footer-col ul li a:hover { color: var(--pink-main); }
+.footer-bottom { max-width: 1400px; margin: 0 auto; border-top: 1px solid var(--border-main); padding-top: 25px; text-align: center; color: var(--text-muted); font-size: 13.5px; font-weight: 500; transition: border-color 0.3s, color 0.3s; }
 
 /* 📱 모바일 최적화 */
 @media (max-width: 768px) {
@@ -197,12 +205,14 @@ table th { border-bottom: 2px solid var(--border-main); }
     .home-cards { grid-template-columns: 1fr; gap: 15px; }
     .tabs { flex-direction: column; gap: 10px; }
     .tab-btn { padding: 15px; flex-direction: row; justify-content: center; }
-    .tab-btn span { display: none; }
     .news-list { grid-template-columns: 1fr; }
     .cat-content.active { grid-template-columns: 1fr; }
     .item-card { padding: 18px; }
     .modal-box { width: 95%; padding: 25px; border-radius: 20px; }
     .tab-content { padding: 20px 15px; border-radius: 20px; }
+    /* 모바일 푸터 */
+    .footer-content { grid-template-columns: 1fr; gap: 30px; }
+    .site-footer { padding: 40px 20px 25px; margin-top: 40px; }
 }
 </style>
 </head>
@@ -214,7 +224,7 @@ table th { border-bottom: 2px solid var(--border-main); }
         <a class="nav-link active" onclick="switchPage('page-home', this)">홈</a>
         <a class="nav-link" id="nav-news" onclick="switchPage('page-news', this)">모찌 기사단</a>
         <a class="nav-link" onclick="switchPage('page-market', this)">시세 조회</a>
-        <!-- 🌟 다크 모드 토글 버튼 추가 -->
+        <!-- 다크 모드 토글 -->
         <button id="darkModeToggle" class="theme-btn" onclick="toggleDarkMode()" title="다크 모드 전환">🌙</button>
     </nav>
 </header>
@@ -239,7 +249,7 @@ table th { border-bottom: 2px solid var(--border-main); }
     <main>
         <div id="page-home" class="page-section active">
             
-            <!-- 🌟 슬라이드쇼 히어로 배너 -->
+            <!-- 슬라이드쇼 히어로 배너 -->
             <section class="hero">
                 <div id="heroSliderBg"></div>
                 <div class="hero-overlay"></div>
@@ -380,7 +390,38 @@ table th { border-bottom: 2px solid var(--border-main); }
     </main>
 </div>
 
-<!-- 집중 모드 뉴스 팝업창 -->
+<!-- 🌟 새롭게 추가된 푸터 (Footer) 영역 🌟 -->
+<footer class="site-footer">
+    <div class="footer-content">
+        <!-- 1. 좌측 설명 -->
+        <div class="footer-col">
+            <div class="footer-logo">🐱 모찌 소식</div>
+            <p>모찌 서버 내 다양한 사건사고와 활동하는 유저들의<br>이야기를 전합니다.</p>
+            <p style="margin-top: 5px; font-weight: 700; color: var(--text-main);">Created by 진서(페링)</p>
+        </div>
+        
+        <!-- 2. 중앙 정책 -->
+        <div class="footer-col">
+            <h4>정책</h4>
+            <ul>
+                <li><a href="#" onclick="alert('개인정보처리방침 준비 중입니다.')">개인정보처리방침</a></li>
+            </ul>
+        </div>
+        
+        <!-- 3. 우측 문의 -->
+        <div class="footer-col">
+            <h4>문의</h4>
+            <p>discord : dora2341232</p>
+        </div>
+    </div>
+    
+    <!-- 4. 하단 저작권 표시 -->
+    <div class="footer-bottom">
+        &copy; 2026 모찌 소식. All rights reserved.
+    </div>
+</footer>
+
+<!-- 팝업창 (모달) -->
 <div id="newsModal" class="modal-overlay" onclick="closeNewsModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeNewsModal()">×</span>
@@ -403,7 +444,6 @@ table th { border-bottom: 2px solid var(--border-main); }
 </div>
 
 <script>
-    // 🌟 다크 모드 토글 로직 🌟
     function toggleDarkMode() {
         const docEl = document.documentElement;
         const currentTheme = docEl.getAttribute('data-theme');
@@ -413,23 +453,20 @@ table th { border-bottom: 2px solid var(--border-main); }
         localStorage.setItem('theme', newTheme);
         
         document.getElementById('darkModeToggle').innerText = newTheme === 'dark' ? '☀️' : '🌙';
-        
-        // 차트 눈금선이 변경된 테마에 맞게 렌더링되도록 차트 업데이트 유도
         if(searchChartInstance) updateChart();
     }
 
-    // 로딩 시 버튼 아이콘 맞춰주기
     document.addEventListener("DOMContentLoaded", () => {
         const theme = document.documentElement.getAttribute('data-theme');
         document.getElementById('darkModeToggle').innerText = theme === 'dark' ? '☀️' : '🌙';
     });
-
 
     function switchPage(pageId, btnElement) {
         document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         btnElement.classList.add('active');
+        window.scrollTo({ top: 0, behavior: 'smooth' }); // 페이지 이동 시 맨 위로 스크롤
     }
 
     function formatKRW(num) {
@@ -462,7 +499,6 @@ table th { border-bottom: 2px solid var(--border-main); }
         btnElement.classList.add('active');
     }
 
-    // 슬라이드쇼 코드 
     const slideImages = [
         "https://cdn.domi.kr/HvkIAqFGWYafbpxdbjVkJ28x1l0grJ.png",
         "https://cdn.domi.kr/f4DmNmTg76L6YgGlBhbpQYuV7cPvX3.png",
@@ -498,7 +534,6 @@ table th { border-bottom: 2px solid var(--border-main); }
         }, 100);
     }
 
-    // 뉴스 팝업창 로직 
     let originalNewsTitle = null; 
     const SUPABASE_URL = "https://lgjmpburuksnfspmizmr.supabase.co"; 
     const SUPABASE_KEY = "sb_publishable_hJgDJqaZOvU1zF2E7x88Hg_wtxsJGdH";
@@ -564,7 +599,6 @@ table th { border-bottom: 2px solid var(--border-main); }
         } catch (error) { alert("오류가 발생했습니다: " + error); }
     }
 
-    // 카테고리 등 렌더링 로직 
     const rawLogs = {{ logs_json | safe }};
     let latestTime = 0;
 
@@ -790,7 +824,6 @@ table th { border-bottom: 2px solid var(--border-main); }
         const ctx = document.getElementById('searchChart').getContext('2d');
         if (searchChartInstance) searchChartInstance.destroy();
         
-        // 다크모드 대응 차트 눈금선 컬러
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
         const tickColor = isDark ? '#94a3b8' : '#a4b0be';
