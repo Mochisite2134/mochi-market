@@ -73,11 +73,96 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
 .page-section{display:none;}
 .page-section.active{display:block;}
 
+
+/* 카테고리/기간 버튼 및 아이템 카드 CSS - 누락되어 깨져 보이던 부분 수정 */
+.cat-tabs{
+    display:flex;
+    gap:10px;
+    margin-bottom:20px;
+    flex-wrap:wrap;
+}
+.cat-btn{
+    padding:10px 16px;
+    background:#fff;
+    border:1px solid #edf0f5;
+    border-radius:999px;
+    color:#57606f;
+    font-size:14px;
+    font-weight:800;
+    cursor:pointer;
+    transition:all 0.2s ease;
+    box-shadow:0 3px 10px rgba(0,0,0,.03);
+}
+.cat-btn:hover{
+    border-color:#ff6ba6;
+    color:#ff6ba6;
+    transform:translateY(-1px);
+}
+.cat-btn.active{
+    background:#ff6ba6;
+    border-color:#ff6ba6;
+    color:#fff;
+    box-shadow:0 6px 14px rgba(255,107,166,.22);
+}
+.cat-content{
+    display:none;
+}
+.cat-content.active{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
+    gap:14px;
+}
+.item-card{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:15px;
+    padding:18px 20px;
+    background:#fff;
+    border:1px solid #f1f2f6;
+    border-radius:18px;
+    box-shadow:0 4px 14px rgba(0,0,0,.025);
+    transition:all 0.2s ease;
+}
+.item-card:hover{
+    border-color:#ff6ba6;
+    transform:translateY(-2px);
+}
+.i-name{
+    font-size:16px;
+    font-weight:850;
+    color:#2f3542;
+    line-height:1.35;
+    word-break:keep-all;
+}
+.i-price{
+    min-width:105px;
+    text-align:right;
+    color:#ff6ba6;
+    font-size:15px;
+    font-weight:900;
+    white-space:nowrap;
+}
+.tab-btn span{
+    font-size:14px;
+    font-weight:700;
+    opacity:.88;
+}
+
+
 /* 📱 모바일 최적화 */
 @media (max-width: 768px) {
+    header { padding: 0 18px; }
+    .top-nav { gap: 14px; }
+    .top-nav a { font-size: 14px; }
     .layout { grid-template-columns: 1fr; }
+    .tabs { flex-direction: column; }
     .news-list { grid-template-columns: 1fr; }
     .hero { padding: 40px 20px; }
+    .home-cards { grid-template-columns: 1fr; }
+    .cat-content.active { grid-template-columns: 1fr; }
+    .item-card { align-items:flex-start; flex-direction:column; }
+    .i-price { text-align:left; }
 }
 </style>
 </head>
@@ -285,8 +370,10 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
     }
 
     function switchCat(catId, btnElement) {
-        document.querySelectorAll('.cat-content').forEach(c => c.classList.remove('active'));
-        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        // 카테고리 버튼만 제어하도록 범위를 제한합니다.
+        // 검색 탭의 일간/주간/월간 버튼까지 active가 풀리는 문제를 방지합니다.
+        document.querySelectorAll('#tab-list .cat-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('#tab-list .cat-tabs .cat-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('cat-' + catId).classList.add('active');
         btnElement.classList.add('active');
     }
