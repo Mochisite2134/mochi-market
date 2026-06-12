@@ -77,50 +77,33 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
 .cat-content.active{display:block;}
 th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
 
-/* =========================================
-   📱 모바일 최적화 (반응형 웹 디자인) 추가!
-========================================= */
+/* 📱 모바일 최적화 (반응형 웹 디자인) */
 @media (max-width: 768px) {
-    /* 헤더 및 네비게이션 모바일 맞춤 */
     header { flex-direction: column; height: auto; padding: 15px 20px 0; gap: 15px; }
     .top-nav { width: 100%; justify-content: space-between; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; }
     .top-nav a { padding: 10px 5px; font-size: 15px; }
-
-    /* 레이아웃 구조 변경 (사이드바를 아래로 이동) */
     .layout { display: flex; flex-direction: column; padding: 0 15px; margin: 15px auto; gap: 20px; }
     main { order: 1; }
     .sidebar { order: 2; position: relative; top: 0; margin-bottom: 20px; }
-
-    /* 홈 화면 (히어로 및 카드) 모바일 맞춤 */
     .hero { padding: 40px 20px; border-radius: 16px; }
     .hero h1 { font-size: 28px; }
     .hero p { font-size: 14px; word-break: keep-all; }
     .home-cards { grid-template-columns: 1fr; gap: 15px; }
     .h-card { padding: 30px 20px; }
-
-    /* 매거진(뉴스) 모바일 맞춤 */
     .news-card { padding: 20px; border-radius: 16px; }
     .n-title { font-size: 18px; }
     .n-content { font-size: 14px; padding: 15px; }
-
-    /* 시세 조회 탭 및 버튼 모바일 맞춤 */
     .tabs { flex-direction: column; gap: 10px; }
     .tab-btn { padding: 15px; font-size: 16px; flex-direction: row; justify-content: center; }
-    .tab-btn span { display: none; /* 모바일에서는 부가설명 숨김 처리로 깔끔하게 */ }
+    .tab-btn span { display: none; }
     .cat-tabs { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
     .cat-btn { padding: 10px; font-size: 13px; }
     .tab-content { padding: 20px 15px; border-radius: 16px; }
-
-    /* 검색창 모바일 맞춤 */
     #tab-search > div:first-of-type { flex-direction: column; }
     #tab-search input, #tab-search button { width: 100%; padding: 15px; }
-
-    /* 아이템 리스트 모바일 맞춤 */
     .item-card { flex-direction: column; align-items: flex-start; gap: 8px; }
     .i-price { align-self: flex-end; font-size: 16px; }
-
-    /* 테이블 모바일 스크롤 지원 */
-    #tab-search > div:nth-of-type(3) { overflow-x: auto; white-space: nowrap; }
+    #tab-search > div:nth-of-type(4) { overflow-x: auto; white-space: nowrap; }
     table { min-width: 650px; }
 }
 </style>
@@ -128,7 +111,7 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
 <body>
 
 <header>
-    <div class="logo">🐱 Mochi Server</div>
+    <div class="logo">🐱 모찌 소식</div>
     <nav class="top-nav">
         <a class="nav-link active" onclick="switchPage('page-home', this)">홈</a>
         <a class="nav-link" id="nav-news" onclick="switchPage('page-news', this)">모찌 기사단</a>
@@ -178,7 +161,7 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
             <div class="home-cards" style="margin-top: 20px;">
                 <a href="https://www.mochi.me.kr/team" target="_blank" class="h-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: center; border-color: #fef08a;">
                     <h3 style="color: #eab308;">⭐ 모찌 운영팀</h3>
-                    <p style="margin-bottom: 15px;">서버가 평화로운 이유는 바로 이분들 덕분!<br>24시간 불철주야 모찌 서버를 가꾸는<br>든든하고 매력 넘치는 운영진들을 만나보세요.</p>
+                    <p style="margin-bottom: 15px;">서버를 지켜주는 우리 운영팀!<br>모찌서버를 위해서 열심히 도와주고<br>든든한 운영진들을 만나보세요.</p>
                     <span style="color: #eab308; font-weight: bold;">운영팀 구경가기 👉</span>
                 </a>
                 <a href="https://www.mochi.me.kr/" target="_blank" class="h-card" style="text-decoration: none; color: inherit; display: flex; flex-direction: column; justify-content: center; border-color: #bfdbfe;">
@@ -187,7 +170,7 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
                     <span style="color: #3b82f6; font-weight: bold;">공식 홈페이지 방문 👉</span>
                 </a>
             </div>
-            </div>
+        </div>
 
         <div id="page-news" class="page-section">
             <h2 style="margin-bottom:20px; font-size:24px;">📰 모찌 매거진 최신 뉴스</h2>
@@ -252,6 +235,12 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
                     <button onclick="searchItem()" style="padding:0 30px; background:#ff6ba6; color:white; border:none; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer;">검색하기</button>
                 </div>
                 
+                <div id="periodFilterArea" style="display:none; gap:10px; margin-bottom:15px;">
+                    <button class="cat-btn" id="btn-period-day" onclick="changePeriod(1, this)">📅 일간 (1일)</button>
+                    <button class="cat-btn active" id="btn-period-week" onclick="changePeriod(7, this)">📅 주간 (7일)</button>
+                    <button class="cat-btn" id="btn-period-month" onclick="changePeriod(30, this)">📅 월간 (30일)</button>
+                </div>
+
                 <div style="width:100%; height:250px; margin-bottom:20px; display:none;" id="searchChartArea">
                     <canvas id="searchChart"></canvas>
                 </div>
@@ -287,7 +276,6 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
 </div>
 
 <script>
-    // 페이지 전환
     function switchPage(pageId, btnElement) {
         document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
@@ -295,7 +283,6 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
         btnElement.classList.add('active');
     }
 
-    // 통화 포맷
     function formatKRW(num) {
         if (!num) return "0원";
         let str = "";
@@ -310,7 +297,6 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
         return str.trim() + "원";
     }
 
-    // 탭 및 카테고리 전환
     function switchTab(tabId, btnElement) {
         document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -325,28 +311,47 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
         btnElement.classList.add('active');
     }
 
-    // 검색
+    // 데이터 검색 및 전역 관리 변수들
     const allLogs = {{ logs_json | safe }};
     let searchChartInstance = null;
+    let currentFilteredLogs = []; // 현재 검색된 아이템의 전체 로그 보관용
+    let currentPeriodDays = 7;    // 기본 필터 기간: 주간(7일)
+
+    // 문자열 날짜를 실제 Date 객체로 변환하는 함수 ("06/12 07:11" -> Date 객체)
+    function parseLogDate(dateStr) {
+        try {
+            let parts = dateStr.split(' ');
+            let md = parts[0].split('/');
+            let hm = parts[1].split(':');
+            // 서버 시간 기준인 2026년으로 고정 계산
+            return new Date(2026, parseInt(md[0]) - 1, parseInt(md[1]), parseInt(hm[0]), parseInt(hm[1]));
+        } catch(e) {
+            return new Date();
+        }
+    }
 
     function searchItem() {
         const keyword = document.getElementById('searchInput').value.trim();
         const tbody = document.getElementById('searchResultBody');
+        const filterArea = document.getElementById('periodFilterArea');
         const chartArea = document.getElementById('searchChartArea');
         
         if (!keyword) return;
 
-        let filtered = allLogs.filter(log => log.name.includes(keyword))
-                              .sort((a, b) => new Date(a.date) - new Date(b.date));
+        // 이름 매칭되는 데이터 필터링 후 날짜순 정렬
+        currentFilteredLogs = allLogs.filter(log => log.name.includes(keyword))
+                                     .sort((a, b) => parseLogDate(a.date) - parseLogDate(b.date));
 
-        if (filtered.length === 0) {
+        if (currentFilteredLogs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; color:#888;">검색된 내역이 없습니다.</td></tr>';
+            filterArea.style.display = "none";
             chartArea.style.display = "none";
             return;
         }
 
+        // 1. 하단 표 채우기 (전체 내역 다 보여줌)
         let html = '';
-        [...filtered].reverse().forEach(log => {
+        [...currentFilteredLogs].reverse().forEach(log => {
             html += `
                 <tr style="border-bottom:1px solid #f1f2f6;">
                     <td style="padding:15px; color:#888; font-size:13px;">${log.date}</td>
@@ -361,6 +366,68 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
         });
         tbody.innerHTML = html;
 
+        // 필터 버튼 보이기 및 기본 주간(7일)으로 차트 그리기
+        filterArea.style.display = "flex";
+        document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-period-week').classList.add('active');
+        currentPeriodDays = 7;
+        
+        updateChart();
+    }
+
+    // 일간, 주간, 월간 버튼 클릭 시 처리
+    function changePeriod(days, btnElement) {
+        document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
+        btnElement.classList.add('active');
+        currentPeriodDays = days;
+        updateChart();
+    }
+
+    // 선택된 기간에 맞게 차트만 업데이트하는 함수
+    function updateChart() {
+        const chartArea = document.getElementById('searchChartArea');
+        if (currentFilteredLogs.length === 0) return;
+
+        // 가장 최근 거래의 시간을 기준으로 잡음
+        const latestLogDate = parseLogDate(currentFilteredLogs[currentFilteredLogs.length - 1].date);
+        const limitTime = currentPeriodDays * 24 * 60 * 60 * 1000; // 밀리초 계산
+
+        // 기간 내에 속하는 데이터만 한 번 더 필터링
+        let periodLogs = currentFilteredLogs.filter(log => {
+            let logDate = parseLogDate(log.date);
+            return (latestLogDate - logDate) <= limitTime;
+        });
+
+        if (periodLogs.length === 0) {
+            chartArea.style.display = "none";
+            return;
+        }
+
+        // 4시간 단위로 주머니 채우기 (그룹화)
+        let groupedData = {};
+        periodLogs.forEach(log => {
+            let key = log.date;
+            try {
+                let parts = log.date.split(' ');
+                if (parts.length === 2) {
+                    let datePart = parts[0];
+                    let hourPart = parseInt(parts[1].split(':')[0]);
+                    let groupHour = Math.floor(hourPart / 4) * 4;
+                    key = `${datePart} ${String(groupHour).padStart(2, '0')}:00`;
+                }
+            } catch(e) {}
+
+            if (!groupedData[key]) {
+                groupedData[key] = { sum: 0, count: 0 };
+            }
+            groupedData[key].sum += log.unit_price;
+            groupedData[key].count += 1;
+        });
+
+        let chartLabels = Object.keys(groupedData);
+        let chartPrices = chartLabels.map(key => Math.floor(groupedData[key].sum / groupedData[key].count));
+
+        // 차트 렌더링
         chartArea.style.display = "block";
         const ctx = document.getElementById('searchChart').getContext('2d');
         if (searchChartInstance) searchChartInstance.destroy();
@@ -368,25 +435,26 @@ th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
         searchChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
-                labels: filtered.map(l => l.date),
+                labels: chartLabels,
                 datasets: [{
-                    label: '개당 단가 흐름',
-                    data: filtered.map(l => l.unit_price),
-                    borderColor: '#7a6cff',
-                    backgroundColor: 'rgba(122, 108, 255, 0.1)',
-                    borderWidth: 2, fill: true, tension: 0.3, pointRadius: 4
+                    label: `${currentPeriodDays == 1 ? '일간' : currentPeriodDays == 7 ? '주간' : '월간'} 평균 단가 흐름`,
+                    data: chartPrices,
+                    borderColor: '#ff6ba6',
+                    backgroundColor: 'rgba(255, 107, 166, 0.1)',
+                    borderWidth: 2, fill: true, tension: 0.2, pointRadius: chartLabels.length > 30 ? 2 : 5
                 }]
             },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: {
-                    tooltip: { callbacks: { label: function(c) { return "단가: " + formatKRW(c.raw); } } }
+                    tooltip: { callbacks: { label: function(c) { return "평균 단가: " + formatKRW(c.raw); } } }
                 },
                 scales: { y: { ticks: { callback: function(v) { return formatKRW(v); } } } }
             }
         });
     }
 
+    // 메인화면 7일 누적 통계 차트
     const chartLabels = {{ chart_labels | safe }};
     const chartData = {{ chart_data | safe }};
     const mainCtx = document.getElementById('tradeChart').getContext('2d');
