@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MOCHI MARKET</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Pretendard',sans-serif; background:#f6f7fb; color:#2f3542;}
+
+/* 헤더 및 네비게이션 */
+header{height:70px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 40px; box-shadow:0 2px 10px rgba(0,0,0,.03); position:sticky; top:0; z-index:100;}
+.logo{font-size:24px; font-weight:900; color:#ff6ba6; display:flex; align-items:center; gap:8px;}
+.top-nav{display:flex; gap:30px;}
+.top-nav a{text-decoration:none; font-size:17px; font-weight:700; color:#888; cursor:pointer; padding:23px 0; border-bottom:3px solid transparent; transition:all 0.2s;}
+.top-nav a:hover{color:#ff6ba6;}
+.top-nav a.active{color:#ff6ba6; border-bottom:3px solid #ff6ba6;}
+
+/* 레이아웃 및 사이드바 */
+.layout{max-width:1400px; margin:30px auto; padding:0 20px; display:grid; grid-template-columns:300px 1fr; gap:30px;}
+.sidebar{background:#fff; border-radius:24px; padding:25px; box-shadow:0 5px 20px rgba(0,0,0,.03); height:fit-content; position:sticky; top:100px;}
+.side-title{font-size:16px; font-weight:800; color:#57606f; margin-bottom:15px; padding-bottom:10px; border-bottom:1px solid #f1f2f6;}
+.summary-box{margin-bottom:30px;}
+.summary-item{margin-bottom:15px;}
+.summary-item span{display:block; font-size:13px; color:#888; margin-bottom:3px;}
+.summary-item strong{font-size:20px; color:#2f3542; font-weight:800;}
+.summary-item .pink{color:#ff6ba6;}
+.rank-list{list-style:none;}
+.rank-item{display:flex; align-items:center; gap:12px; padding:10px 0; border-bottom:1px dashed #f1f2f6;}
+.rank-num{width:24px; height:24px; background:#ffe7f1; color:#ff6ba6; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:13px;}
+.rank-name{font-weight:600; font-size:15px;}
+.rank-count{margin-left:auto; font-size:13px; color:#888;}
+
+/* 페이지 전환용 */
+.page-section{display:none;}
+.page-section.active{display:block; animation:fadeIn 0.3s ease;}
+@keyframes fadeIn { from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+/* 1. 홈 화면 CSS */
+.hero{background:linear-gradient(rgba(0,0,0,.3), rgba(0,0,0,.3)), url('https://cdn.domi.kr/AVzT9rsCbVmVsYZtyfTXSuSujn80B5.png') center/cover; padding:80px 40px; border-radius:24px; color:white; text-align:center; margin-bottom:30px; box-shadow:0 10px 30px rgba(0,0,0,.1);}
+.hero h1{font-size:48px; font-weight:900; margin-bottom:10px; text-shadow:0 2px 10px rgba(0,0,0,.3);}
+.hero p{font-size:18px; opacity:0.9;}
+.home-cards{display:grid; grid-template-columns:1fr 1fr; gap:20px;}
+.h-card{background:#fff; padding:40px 30px; border-radius:24px; text-align:center; box-shadow:0 5px 20px rgba(0,0,0,.03); border:1px solid #f1f2f6; transition:transform 0.2s; cursor:pointer;}
+.h-card:hover{transform:translateY(-5px); border-color:#ff6ba6;}
+.h-card h3{font-size:22px; margin-bottom:10px;}
+.h-card p{color:#888; font-size:15px; line-height:1.5;}
+
+/* 2. 매거진(뉴스) CSS */
+.news-card { background:#fff; border-radius:24px; padding:35px; margin-bottom:25px; box-shadow:0 5px 20px rgba(0,0,0,.03); border:1px solid #f1f2f6; transition:transform 0.2s; }
+.news-card:hover { border-color:#ff6ba6; transform:translateY(-2px); }
+.n-header { display:flex; justify-content:space-between; margin-bottom:15px; font-size:14px; color:#888; padding-bottom:15px; border-bottom:1px dashed #f1f2f6; }
+.n-author { font-weight:800; color:#ff6ba6; }
+.n-title { font-size:22px; margin-bottom:20px; color:#2f3542; line-height:1.4; font-weight:800; }
+.n-content { font-size:16px; color:#57606f; line-height:1.8; white-space:pre-wrap; background:#fbfbfd; padding:20px; border-radius:12px; }
+
+/* 3. 시세 화면 CSS */
+.tabs{display:flex; gap:15px; margin-bottom:25px;}
+.tab-btn{flex:1; padding:20px; background:#fff; border:none; border-radius:20px; font-size:18px; font-weight:700; color:#888; cursor:pointer; box-shadow:0 5px 20px rgba(0,0,0,.03); transition:all 0.3s ease; display:flex; flex-direction:column; align-items:center; gap:8px;}
+.tab-btn span{font-size:13px; font-weight:500;}
+.tab-btn.active{background:#ff6ba6; color:#fff;}
+.tab-btn.active span{color:#ffe7f1;}
+.tab-content{display:none; background:#fff; border-radius:24px; padding:30px; box-shadow:0 5px 20px rgba(0,0,0,.03); min-height:500px;}
+.tab-content.active{display:block;}
+
+.item-card{display:flex; justify-content:space-between; align-items:center; padding:15px 20px; border:1px solid #f1f2f6; border-radius:16px; margin-bottom:10px; transition:all 0.2s;}
+.item-card:hover{border-color:#ff6ba6; transform:translateY(-2px);}
+.i-name{font-weight:700; font-size:18px;}
+.i-price{font-weight:800; color:#ff6ba6;}
+
+.cat-tabs{display:flex; gap:10px; margin-bottom:20px;}
+.cat-btn{padding:10px 20px; border-radius:12px; border:1px solid #f1f2f6; background:#fff; font-weight:700; color:#888; cursor:pointer;}
+.cat-btn.active{background:#ff6ba6; color:#fff; border:none;}
+.cat-content{display:none;}
+.cat-content.active{display:block;}
+th { position: sticky; top: 0; background: #f1f2f6; z-index: 10; }
+</style>
+</head>
+<body>
+
+<header>
+    <div class="logo">🍡 모찌 UNIVERSE</div>
+    <nav class="top-nav">
+        <a class="nav-link active" onclick="switchPage('page-home', this)">홈</a>
+        <a class="nav-link" id="nav-news" onclick="switchPage('page-news', this)">모찌 매거진</a>
+        <a class="nav-link" onclick="switchPage('page-market', this)">시세 조회</a>
+    </nav>
+</header>
+
+<div class="layout">
+    <aside class="sidebar">
+        <div class="summary-box">
+            <div class="side-title">누적 거래 현황</div>
+            <div class="summary-item"><span>총 거래 건수</span><strong>{{ "{:,}".format(summary.count) }} 건</strong></div>
+            <div class="summary-item"><span>총 거래 금액</span><strong class="pink">{{ summary.value }}</strong></div>
+            <div class="summary-item"><span>평균 거래 단가</span><strong>{{ summary.avg }}</strong></div>
+        </div>
+
+        <div class="side-title">🔥 인기 거래 TOP 10</div>
+        <ul class="rank-list">
+            {% for item in top_10 %}
+            <li class="rank-item">
+                <div class="rank-num">{{ loop.index }}</div>
+                <div class="rank-name">{{ item.name }}</div>
+                <div class="rank-count">거래 {{ item.count }}건</div>
+            </li>
+            {% endfor %}
+        </ul>
+    </aside>
+
+    <main>
+        <div id="page-home" class="page-section active">
+            <section class="hero">
+                <h1>MOCHI SERVER</h1>
+                <p>모찌 서버의 모든 이야기와 실시간 경제 흐름을 한곳에서</p>
+            </section>
+            
+            <div class="home-cards">
+                <div class="h-card" onclick="document.getElementById('nav-news').click()">
+                    <h3 style="color:#ff6ba6;">📰 모찌 매거진</h3>
+                    <p>서버 내 다양한 사건사고와<br>유저들의 재미있는 이야기를 전합니다.<br><br><span style="color:#ff6ba6; font-weight:bold;">새로운 기사 보러 가기 👉</span></p>
+                </div>
+                <div class="h-card">
+                    <h3 style="color:#7a6cff;">🎤 피플 & 인터뷰</h3>
+                    <p>모찌 서버를 빛내는 아티스트와<br>유명 플레이어들을 만나보세요.<br><br>(업데이트 준비 중)</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="page-news" class="page-section">
+            <h2 style="margin-bottom:20px; font-size:24px;">📰 모찌 매거진 최신 뉴스</h2>
+            <div class="news-list">
+                {% for news in news_list %}
+                <div class="news-card">
+                    <div class="n-header">
+                        <span class="n-author">{{ news.author }}</span>
+                        <span class="n-date">{{ news.date }}</span>
+                    </div>
+                    <h3 class="n-title">{{ news.title }}</h3>
+                    <div class="n-content">{{ news.content }}</div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <div id="page-market" class="page-section">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('tab-list', this)">
+                    🔍 아이템 시세 목록
+                    <span>카테고리별 시세를 확인하세요</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('tab-search', this)">
+                    🎯 상세 시세 검색
+                    <span>특정 아이템의 시세 흐름을 검색합니다</span>
+                </button>
+                <button class="tab-btn" onclick="switchTab('tab-stats', this)">
+                    📊 거래 통계 차트
+                    <span>최근 시세 변동 그래프를 확인하세요</span>
+                </button>
+            </div>
+
+            <div id="tab-list" class="tab-content active">
+                <div class="cat-tabs">
+                    <button class="cat-btn active" onclick="switchCat('차량', this)">🚗 차량</button>
+                    <button class="cat-btn" onclick="switchCat('스킨', this)">👕 스킨/치장</button>
+                    <button class="cat-btn" onclick="switchCat('아이템', this)">📦 일반 아이템</button>
+                </div>
+
+                {% for cat_name, items in cat_items.items() %}
+                <div id="cat-{{ cat_name }}" class="cat-content {% if cat_name == '차량' %}active{% endif %}">
+                    {% for item in items %}
+                    <div class="item-card">
+                        <div>
+                            <div class="i-name">{{ item.name }}</div>
+                            <div style="font-size:13px; color:#888; margin-top:5px;">총 {{ item.count }}번 거래됨</div>
+                        </div>
+                        <div class="i-price">평균 {{ item.avg_price }}</div>
+                    </div>
+                    {% else %}
+                    <div style="padding:30px; text-align:center; color:#888;">해당 카테고리의 거래 내역이 없습니다.</div>
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <div id="tab-search" class="tab-content">
+                <h2 style="margin-bottom:20px; font-size:20px;">🎯 아이템 상세 시세 검색</h2>
+                <div style="display:flex; gap:10px; margin-bottom:20px;">
+                    <input type="text" id="searchInput" placeholder="검색할 아이템 이름 (예: 좀비)" style="flex:1; padding:15px; border:1px solid #f1f2f6; border-radius:12px; font-size:16px; outline:none;" onkeypress="if(event.keyCode==13) searchItem()">
+                    <button onclick="searchItem()" style="padding:0 30px; background:#ff6ba6; color:white; border:none; border-radius:12px; font-size:16px; font-weight:700; cursor:pointer;">검색하기</button>
+                </div>
+                
+                <div style="width:100%; height:250px; margin-bottom:20px; display:none;" id="searchChartArea">
+                    <canvas id="searchChart"></canvas>
+                </div>
+
+                <div style="max-height: 350px; overflow-y: auto; border:1px solid #f1f2f6; border-radius:12px;">
+                    <table style="width:100%; border-collapse:collapse; text-align:center; font-size:14px;">
+                        <thead style="color: #57606f;">
+                            <tr>
+                                <th style="padding:15px; border-radius:12px 0 0 0;">거래일시</th>
+                                <th style="padding:15px;">아이템</th>
+                                <th style="padding:15px;">수량</th>
+                                <th style="padding:15px;">개당 단가</th>
+                                <th style="padding:15px;">총 금액</th>
+                                <th style="padding:15px; color:#ff6ba6;">판매자</th>
+                                <th style="padding:15px; color:#7a6cff; border-radius:0 12px 0 0;">구매자</th>
+                            </tr>
+                        </thead>
+                        <tbody id="searchResultBody">
+                            <tr><td colspan="7" style="padding:30px; color:#888;">아이템 이름을 검색하시면 시세 차트와 기록이 나타납니다.</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="tab-stats" class="tab-content">
+                <h2 style="margin-bottom:20px; font-size:20px;">📈 최근 7일 거래액 추이</h2>
+                <div style="width:100%; height:400px;">
+                    <canvas id="tradeChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    // 페이지 전환
+    function switchPage(pageId, btnElement) {
+        document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    // 통화 포맷
+    function formatKRW(num) {
+        if (!num) return "0원";
+        let str = "";
+        let jo = Math.floor(num / 1000000000000);
+        let eok = Math.floor((num % 1000000000000) / 100000000);
+        let man = Math.floor((num % 100000000) / 10000);
+        
+        if (jo > 0) str += jo + (eok > 0 ? "." + Math.floor(eok/10) : "") + "조 ";
+        else if (eok > 0) str += eok + (man > 0 ? "." + Math.floor(man/1000) : "") + "억 ";
+        else if (man > 0) str += man + "만 ";
+        else str += num + "";
+        return str.trim() + "원";
+    }
+
+    // 탭 및 카테고리 전환
+    function switchTab(tabId, btnElement) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById(tabId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    function switchCat(catId, btnElement) {
+        document.querySelectorAll('.cat-content').forEach(c => c.classList.remove('active'));
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('cat-' + catId).classList.add('active');
+        btnElement.classList.add('active');
+    }
+
+    // 검색
+    const allLogs = {{ logs_json | safe }};
+    let searchChartInstance = null;
+
+    function searchItem() {
+        const keyword = document.getElementById('searchInput').value.trim();
+        const tbody = document.getElementById('searchResultBody');
+        const chartArea = document.getElementById('searchChartArea');
+        
+        if (!keyword) return;
+
+        let filtered = allLogs.filter(log => log.name.includes(keyword))
+                              .sort((a, b) => new Date(a.date) - new Date(b.date));
+
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:30px; color:#888;">검색된 내역이 없습니다.</td></tr>';
+            chartArea.style.display = "none";
+            return;
+        }
+
+        let html = '';
+        [...filtered].reverse().forEach(log => {
+            html += `
+                <tr style="border-bottom:1px solid #f1f2f6;">
+                    <td style="padding:15px; color:#888; font-size:13px;">${log.date}</td>
+                    <td style="padding:15px; font-weight:700;">${log.name}</td>
+                    <td style="padding:15px;">${log.qty.toLocaleString()}개</td>
+                    <td style="padding:15px; color:#7a6cff; font-weight:700;">${formatKRW(log.unit_price)}</td>
+                    <td style="padding:15px; font-weight:700;">${formatKRW(log.total_price)}</td>
+                    <td style="padding:15px; color:#ff6ba6;">${log.seller}</td>
+                    <td style="padding:15px; color:#7a6cff;">${log.buyer}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = html;
+
+        chartArea.style.display = "block";
+        const ctx = document.getElementById('searchChart').getContext('2d');
+        if (searchChartInstance) searchChartInstance.destroy();
+        
+        searchChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: filtered.map(l => l.date),
+                datasets: [{
+                    label: '개당 단가 흐름',
+                    data: filtered.map(l => l.unit_price),
+                    borderColor: '#7a6cff',
+                    backgroundColor: 'rgba(122, 108, 255, 0.1)',
+                    borderWidth: 2, fill: true, tension: 0.3, pointRadius: 4
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    tooltip: { callbacks: { label: function(c) { return "단가: " + formatKRW(c.raw); } } }
+                },
+                scales: { y: { ticks: { callback: function(v) { return formatKRW(v); } } } }
+            }
+        });
+    }
+
+    const chartLabels = {{ chart_labels | safe }};
+    const chartData = {{ chart_data | safe }};
+    const mainCtx = document.getElementById('tradeChart').getContext('2d');
+    new Chart(mainCtx, {
+        type: 'bar',
+        data: {
+            labels: chartLabels,
+            datasets: [{
+                label: '일별 총 거래액',
+                data: chartData,
+                backgroundColor: '#ff6ba6',
+                borderRadius: 8
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                tooltip: { callbacks: { label: function(c) { return formatKRW(c.raw); } } }
+            },
+            scales: { y: { beginAtZero: true, ticks: { callback: function(v) { return formatKRW(v); } } } }
+        }
+    });
+</script>
+
+</body>
+</html>
