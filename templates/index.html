@@ -72,7 +72,7 @@ input, textarea { -webkit-user-select: auto; user-select: auto; }
 body { font-family:'Pretendard',sans-serif; background:var(--bg-body); color:var(--text-main); line-height: 1.5; transition: background 0.3s ease, color 0.3s ease; }
 
 /* 🌟 헤더 (상단바) */
-header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); display:flex; align-items:center; justify-content:space-between; padding:0 40px; box-shadow:0 4px 20px var(--shadow-light); position:sticky; top:0; z-index:100; border-bottom: 1px solid var(--border-main); transition: background 0.3s, border-color 0.3s; }
+header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); display:flex; align-items:center; justify-content:space-between; padding:0 40px; box-shadow:0 4px 20px var(--shadow-light); position:sticky; top:0; z-index:100; border-bottom: 1px solid var(--border-main); transition: background 0.3s, border-color 0.3s; flex-wrap: wrap; }
 .logo { font-size:24px; font-weight:900; color:var(--pink-main); display:flex; align-items:center; gap:8px; letter-spacing: -0.5px; }
 .top-nav { display:flex; gap:25px; align-items: center; }
 .top-nav a { text-decoration:none; font-size:17px; font-weight:700; color:var(--text-sub); cursor:pointer; padding:25px 0; border-bottom:3px solid transparent; transition:all 0.3s ease; }
@@ -80,6 +80,9 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .top-nav a.active { color:var(--pink-main); border-bottom:3px solid var(--pink-main); }
 .theme-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 10px; border-radius: 50%; transition: transform 0.3s ease; display: flex; align-items: center; justify-content: center; }
 .theme-btn:hover { transform: scale(1.1) rotate(15deg); background: var(--bg-hover); }
+
+/* 스크롤바 숨기기 (모바일 스와이프 용) */
+.top-nav::-webkit-scrollbar, .tabs::-webkit-scrollbar, .cat-tabs::-webkit-scrollbar, .table-responsive::-webkit-scrollbar { display: none; }
 
 /* 🌟 전체 레이아웃 (사이드바 + 메인) */
 .layout { max-width:1440px; margin:35px auto; padding:0 25px; display:grid; grid-template-columns:320px 1fr; gap:35px; min-height: 80vh; }
@@ -167,6 +170,15 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .page-section.active { display:block; animation: fadeIn 0.4s ease; }
 @keyframes fadeIn { from{opacity:0; transform:translateY(15px);} to{opacity:1; transform:translateY(0);} }
 
+/* 🌟 시세 검색 컨테이너 */
+.search-container { display:flex; gap:12px; margin-bottom:25px; }
+.search-input { flex:1; padding:18px; border:2px solid var(--border-main); border-radius:14px; font-size:16px; outline:none; transition: 0.3s; background: var(--bg-input); color: var(--text-main); }
+.search-input:focus { border-color: var(--pink-main); }
+.search-btn { padding:0 35px; background:var(--pink-main); color:white; border:none; border-radius:14px; font-size:17px; font-weight:800; cursor:pointer; box-shadow: 0 5px 15px var(--pink-light); transition: 0.2s; }
+.search-btn:hover { transform: translateY(-2px); }
+.period-filter-area { display:none; gap:10px; margin-bottom:20px; }
+.chart-container { width:100%; height:250px; margin-bottom:25px; display:none; }
+
 /* 🌟 카테고리/기간 버튼 및 아이템 카드 CSS */
 .cat-tabs { display:flex; gap:12px; margin-bottom:25px; flex-wrap:wrap; }
 .cat-btn { padding:12px 20px; background:var(--bg-table-head); border:1px solid var(--border-main); border-radius:999px; color:var(--text-sub); font-size:15px; font-weight:800; cursor:pointer; transition:all 0.2s ease; }
@@ -178,11 +190,16 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .item-card:hover { border-color:var(--pink-main); transform:translateY(-4px); box-shadow:0 10px 25px var(--pink-light); }
 .i-name { font-size:16px; font-weight:900; color:var(--text-main); line-height:1.35; word-break:keep-all; }
 .i-price { min-width:110px; text-align:right; color:var(--pink-main); font-size:16px; font-weight:900; white-space:nowrap; }
+.tab-btn span { font-size:14px; font-weight:700; opacity:.9; }
 
-table thead { background: var(--bg-table-head); color: var(--text-sub); transition: background 0.3s, color 0.3s;}
-table th { border-bottom: 2px solid var(--border-main); }
+/* 표 모바일 스와이프를 위한 감싸기 */
+.table-responsive { max-height: 400px; overflow-y: auto; overflow-x: auto; border: 1px solid var(--border-main); border-radius: 16px; transition: border-color 0.3s; -webkit-overflow-scrolling: touch; }
+table { width: 100%; border-collapse: collapse; text-align: center; font-size: 14.5px; min-width: 650px; }
+table thead { background: var(--bg-table-head); color: var(--text-sub); transition: background 0.3s, color 0.3s; position: sticky; top: 0;}
+table th { padding: 18px; border-bottom: 2px solid var(--border-main); }
+table td { padding: 18px; border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
-/* 🌟 푸터 (하단 영역) CSS 🌟 */
+/* 🌟 푸터 (하단 영역) CSS */
 .site-footer { background: var(--bg-card); border-top: 1px solid var(--border-main); padding: 50px 40px 30px; margin-top: 60px; transition: background 0.3s, border-color 0.3s; }
 .footer-content { max-width: 1400px; margin: 0 auto; display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 40px; margin-bottom: 40px; }
 .footer-col { display: flex; flex-direction: column; gap: 15px; }
@@ -194,24 +211,58 @@ table th { border-bottom: 2px solid var(--border-main); }
 .footer-col ul li a:hover { color: var(--pink-main); }
 .footer-bottom { max-width: 1400px; margin: 0 auto; border-top: 1px solid var(--border-main); padding-top: 25px; text-align: center; color: var(--text-muted); font-size: 13.5px; font-weight: 500; transition: border-color 0.3s, color 0.3s; }
 
-/* 📱 모바일 최적화 */
+
+/* =======================================================
+   📱 모바일 완벽 최적화 (혁신적인 앱 UX 적용)
+======================================================== */
 @media (max-width: 768px) {
-    header { padding: 0 20px; height: 65px; }
-    .top-nav { gap: 15px; }
-    .top-nav a { font-size: 15px; padding: 20px 0; }
-    .layout { grid-template-columns: 1fr; margin: 20px auto; padding: 0 15px; }
-    .hero { padding: 40px 25px; border-radius: 20px; }
+    /* 1. 상단 헤더 및 네비게이션 좌우 스와이프 */
+    header { flex-direction: row; height: auto; padding: 15px 20px 0; }
+    .logo { flex: 1; font-size: 22px; }
+    .theme-btn { margin-left: auto; padding: 5px; }
+    .top-nav { width: 100%; justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; -webkit-overflow-scrolling: touch; border-top: 1px solid var(--border-main); margin-top: 10px; padding-top: 5px; gap: 10px; }
+    .top-nav a { font-size: 15px; padding: 12px 10px; }
+    
+    /* 2. 콘텐츠 우선 배치! 사이드바는 맨 밑으로 */
+    .layout { display: flex; flex-direction: column; margin: 15px auto; padding: 0 15px; gap: 25px; min-height: auto; }
+    main { order: 1; }
+    .sidebar { order: 2; position: static; height: auto; }
+    
+    /* 3. 히어로 배너 및 카드 비율 조정 */
+    .hero { padding: 45px 25px; border-radius: 20px; margin-bottom: 20px; }
     .hero-content h1 { font-size: 32px; }
     .home-cards { grid-template-columns: 1fr; gap: 15px; }
-    .tabs { flex-direction: column; gap: 10px; }
-    .tab-btn { padding: 15px; flex-direction: row; justify-content: center; }
-    .news-list { grid-template-columns: 1fr; }
-    .cat-content.active { grid-template-columns: 1fr; }
+    .h-card { min-height: 190px; padding: 30px 25px; }
+    
+    /* 4. 시세 탭 버튼 좌우 스와이프 */
+    .tabs { flex-direction: row; overflow-x: auto; white-space: nowrap; padding-bottom: 10px; -webkit-overflow-scrolling: touch; }
+    .tab-btn { flex: 0 0 auto; padding: 16px 20px; font-size: 16px; }
+    .tab-btn span { display: none; } /* 설명 숨겨서 공간 확보 */
+    
+    /* 5. 아이템 검색, 테이블, 카테고리 최적화 */
+    .search-container { flex-direction: column; gap: 10px; }
+    .search-input { width: 100%; padding: 16px; }
+    .search-btn { width: 100%; padding: 16px; }
+    
+    .cat-tabs { overflow-x: auto; white-space: nowrap; flex-wrap: nowrap; padding-bottom: 5px; -webkit-overflow-scrolling: touch; }
+    .cat-btn { flex: 0 0 auto; }
+    .cat-content.active { grid-template-columns: 1fr; gap: 12px; }
     .item-card { padding: 18px; }
-    .modal-box { width: 95%; padding: 25px; border-radius: 20px; }
-    .tab-content { padding: 20px 15px; border-radius: 20px; }
-    /* 모바일 푸터 */
-    .footer-content { grid-template-columns: 1fr; gap: 30px; }
+    
+    .news-list { grid-template-columns: 1fr; gap: 15px; }
+    .news-card { padding: 20px; }
+    .n-img { height: 160px; }
+    
+    /* 6. 모달(팝업) 크기 최적화 */
+    .modal-box { width: 95%; padding: 25px 20px; max-height: 85vh; border-radius: 20px; }
+    #modal-title { font-size: 22px !important; margin-bottom: 15px !important; }
+    .modal-edit-btn { top: 15px; right: 55px; padding: 6px 12px; font-size: 13px; }
+    .modal-close { top: 10px; right: 20px; font-size: 28px; }
+    .modal-text { padding: 20px; font-size: 14.5px; }
+    
+    /* 7. 푸터 세로 정렬 */
+    .footer-content { grid-template-columns: 1fr; gap: 30px; text-align: center; }
+    .footer-col { align-items: center; }
     .site-footer { padding: 40px 20px 25px; margin-top: 40px; }
 }
 </style>
@@ -220,12 +271,13 @@ table th { border-bottom: 2px solid var(--border-main); }
 
 <header>
     <div class="logo">🐱 모찌 소식</div>
+    <!-- 다크 모드 토글 (모바일에서도 로고 옆에 예쁘게 배치) -->
+    <button id="darkModeToggle" class="theme-btn" onclick="toggleDarkMode()" title="다크 모드 전환">🌙</button>
+    
     <nav class="top-nav">
         <a class="nav-link active" onclick="switchPage('page-home', this)">홈</a>
         <a class="nav-link" id="nav-news" onclick="switchPage('page-news', this)">모찌 기사단</a>
         <a class="nav-link" onclick="switchPage('page-market', this)">시세 조회</a>
-        <!-- 다크 모드 토글 -->
-        <button id="darkModeToggle" class="theme-btn" onclick="toggleDarkMode()" title="다크 모드 전환">🌙</button>
     </nav>
 </header>
 
@@ -345,32 +397,33 @@ table th { border-bottom: 2px solid var(--border-main); }
 
             <div id="tab-search" class="tab-content">
                 <h2 style="margin-bottom:20px; font-size:22px; font-weight: 900; color: var(--text-main);">🎯 아이템 상세 시세 검색</h2>
-                <div style="display:flex; gap:12px; margin-bottom:25px;">
-                    <input type="text" id="searchInput" placeholder="검색할 아이템 이름 (예: 좀비)" style="flex:1; padding:18px; border:2px solid var(--border-main); border-radius:14px; font-size:16px; outline:none; transition: 0.3s; background: var(--bg-input); color: var(--text-main);" onfocus="this.style.borderColor='var(--pink-main)'" onblur="this.style.borderColor='var(--border-main)'" onkeypress="if(event.keyCode==13) searchItem()">
-                    <button onclick="searchItem()" style="padding:0 35px; background:var(--pink-main); color:white; border:none; border-radius:14px; font-size:17px; font-weight:800; cursor:pointer; box-shadow: 0 5px 15px var(--pink-light); transition: 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">검색하기</button>
+                <div class="search-container">
+                    <input type="text" id="searchInput" class="search-input" placeholder="검색할 아이템 이름 (예: 좀비)" onkeypress="if(event.keyCode==13) searchItem()">
+                    <button class="search-btn" onclick="searchItem()">검색하기</button>
                 </div>
                 
-                <div id="periodFilterArea" style="display:none; gap:10px; margin-bottom:20px;">
+                <div id="periodFilterArea" class="period-filter-area">
                     <button class="cat-btn" id="btn-period-day" onclick="changePeriod(1, this)">📅 일간 (1일)</button>
                     <button class="cat-btn active" id="btn-period-week" onclick="changePeriod(7, this)">📅 주간 (7일)</button>
                     <button class="cat-btn" id="btn-period-month" onclick="changePeriod(30, this)">📅 월간 (30일)</button>
                 </div>
 
-                <div style="width:100%; height:250px; margin-bottom:25px; display:none;" id="searchChartArea">
+                <div id="searchChartArea" class="chart-container">
                     <canvas id="searchChart"></canvas>
                 </div>
 
-                <div style="max-height: 400px; overflow-y: auto; border:1px solid var(--border-main); border-radius:16px; transition: border-color 0.3s;">
-                    <table style="width:100%; border-collapse:collapse; text-align:center; font-size:14.5px;">
+                <!-- 🌟 표 가로 스크롤 허용 (모바일 꿀기능) 🌟 -->
+                <div class="table-responsive">
+                    <table>
                         <thead>
                             <tr>
-                                <th style="padding:18px;">거래일시</th>
-                                <th style="padding:18px;">아이템</th>
-                                <th style="padding:18px;">수량</th>
-                                <th style="padding:18px;">개당 단가</th>
-                                <th style="padding:18px;">총 금액</th>
-                                <th style="padding:18px; color:#ff6ba6;">판매자</th>
-                                <th style="padding:18px; color:#3b82f6;">구매자</th>
+                                <th>거래일시</th>
+                                <th>아이템</th>
+                                <th>수량</th>
+                                <th>개당 단가</th>
+                                <th>총 금액</th>
+                                <th style="color:#ff6ba6;">판매자</th>
+                                <th style="color:#3b82f6;">구매자</th>
                             </tr>
                         </thead>
                         <tbody id="searchResultBody">
@@ -390,32 +443,25 @@ table th { border-bottom: 2px solid var(--border-main); }
     </main>
 </div>
 
-<!-- 🌟 새롭게 추가된 푸터 (Footer) 영역 🌟 -->
+<!-- 🌟 푸터 (Footer) 영역 -->
 <footer class="site-footer">
     <div class="footer-content">
-        <!-- 1. 좌측 설명 -->
         <div class="footer-col">
             <div class="footer-logo">🐱 모찌 소식</div>
-            <p>모찌 서버 내 다양한 사건사고와 활동하는 유저들의<br>이야기를 전합니다.</p>
-            <p style="margin-top: 5px; font-weight: 700; color: var(--text-main);">Created by 진서(페링)</p>
+            <p>모찌 서버 내 다양한 사건사고와 활동하는 유저들의<br>생생한 이야기를 전합니다.</p>
+            <p style="margin-top: 5px; font-weight: 800; color: var(--text-main);">Created by 진서(페링)</p>
         </div>
-        
-        <!-- 2. 중앙 정책 -->
         <div class="footer-col">
             <h4>정책</h4>
             <ul>
                 <li><a href="#" onclick="alert('개인정보처리방침 준비 중입니다.')">개인정보처리방침</a></li>
             </ul>
         </div>
-        
-        <!-- 3. 우측 문의 -->
         <div class="footer-col">
             <h4>문의</h4>
             <p>discord : dora2341232</p>
         </div>
     </div>
-    
-    <!-- 4. 하단 저작권 표시 -->
     <div class="footer-bottom">
         &copy; 2026 모찌 소식. All rights reserved.
     </div>
@@ -466,7 +512,7 @@ table th { border-bottom: 2px solid var(--border-main); }
         document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         btnElement.classList.add('active');
-        window.scrollTo({ top: 0, behavior: 'smooth' }); // 페이지 이동 시 맨 위로 스크롤
+        window.scrollTo({ top: 0, behavior: 'smooth' }); 
     }
 
     function formatKRW(num) {
