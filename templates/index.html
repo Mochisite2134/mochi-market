@@ -40,7 +40,7 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
 .h-card{background:#fff; padding:40px 30px; border-radius:24px; text-align:center; box-shadow:0 5px 20px rgba(0,0,0,.03); border:1px solid #f1f2f6; transition:transform 0.2s; cursor:pointer;}
 .h-card:hover{transform:translateY(-5px); border-color:#ff6ba6;}
 
-/* 2. 매거진(뉴스) CSS - 바둑판식(Grid) 적용 */
+/* 2. 매거진(뉴스) CSS - 바둑판식(Grid) 적용 및 클릭 커서 추가 */
 .news-list {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
@@ -55,13 +55,28 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
     transition:transform 0.2s;
     display: flex;
     flex-direction: column;
+    cursor: pointer; /* 클릭 가능한 느낌 주기 */
 }
 .news-card:hover { border-color:#ff6ba6; transform:translateY(-5px); }
 .n-header { display:flex; justify-content:space-between; margin-bottom:15px; font-size:13px; color:#888; }
 .n-author { font-weight:800; color:#ff6ba6; }
 .n-title { font-size:18px; margin-bottom:15px; color:#2f3542; line-height:1.4; font-weight:800; }
-.n-content { font-size:14px; color:#57606f; line-height:1.6; overflow:hidden; flex-grow: 1; }
+/* 카드의 내용은 4줄까지만 보여주고 자름 (팝업에서 전체 확인) */
+.n-content-preview { font-size:14px; color:#57606f; line-height:1.6; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow:hidden; flex-grow: 1; }
 .n-img { width:100%; height:180px; object-fit:cover; border-radius:16px; margin-bottom:15px; background:#f1f2f6; }
+
+/* 🌟 집중 모드 팝업창 (모달) CSS 🌟 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px); }
+.modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+.modal-box { background: #fff; width: 90%; max-width: 650px; border-radius: 24px; padding: 40px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 10px 40px rgba(0,0,0,0.3); }
+.modal-close { position: absolute; top: 20px; right: 25px; font-size: 28px; cursor: pointer; color: #888; transition: color 0.2s; }
+.modal-close:hover { color: #ff6ba6; }
+/* 💡 white-space: pre-wrap 덕분에 띄어쓰기와 엔터가 완벽하게 유지됩니다! */
+.modal-text { white-space: pre-wrap; line-height: 1.8; color: #333; font-size: 15px; margin-top: 20px; background: #fbfbfd; padding: 25px; border-radius: 16px; }
+.modal-edit-btn { position: absolute; top: 25px; right: 70px; background: #f1f2f6; border: none; padding: 8px 16px; border-radius: 8px; font-weight: bold; color: #57606f; cursor: pointer; transition: 0.2s; }
+.modal-edit-btn:hover { background: #ff6ba6; color: white; }
+.edit-input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 15px; font-size: 16px; font-family: inherit; }
+.edit-textarea { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #ddd; font-size: 15px; height: 350px; resize: vertical; font-family: inherit; line-height: 1.6; }
 
 /* 3. 시세 화면 CSS */
 .tabs{display:flex; gap:15px; margin-bottom:25px;}
@@ -74,81 +89,18 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
 .page-section.active{display:block;}
 
 
-/* 카테고리/기간 버튼 및 아이템 카드 CSS - 누락되어 깨져 보이던 부분 수정 */
-.cat-tabs{
-    display:flex;
-    gap:10px;
-    margin-bottom:20px;
-    flex-wrap:wrap;
-}
-.cat-btn{
-    padding:10px 16px;
-    background:#fff;
-    border:1px solid #edf0f5;
-    border-radius:999px;
-    color:#57606f;
-    font-size:14px;
-    font-weight:800;
-    cursor:pointer;
-    transition:all 0.2s ease;
-    box-shadow:0 3px 10px rgba(0,0,0,.03);
-}
-.cat-btn:hover{
-    border-color:#ff6ba6;
-    color:#ff6ba6;
-    transform:translateY(-1px);
-}
-.cat-btn.active{
-    background:#ff6ba6;
-    border-color:#ff6ba6;
-    color:#fff;
-    box-shadow:0 6px 14px rgba(255,107,166,.22);
-}
-.cat-content{
-    display:none;
-}
-.cat-content.active{
-    display:grid;
-    grid-template-columns:repeat(auto-fill, minmax(260px, 1fr));
-    gap:14px;
-}
-.item-card{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:15px;
-    padding:18px 20px;
-    background:#fff;
-    border:1px solid #f1f2f6;
-    border-radius:18px;
-    box-shadow:0 4px 14px rgba(0,0,0,.025);
-    transition:all 0.2s ease;
-}
-.item-card:hover{
-    border-color:#ff6ba6;
-    transform:translateY(-2px);
-}
-.i-name{
-    font-size:16px;
-    font-weight:850;
-    color:#2f3542;
-    line-height:1.35;
-    word-break:keep-all;
-}
-.i-price{
-    min-width:105px;
-    text-align:right;
-    color:#ff6ba6;
-    font-size:15px;
-    font-weight:900;
-    white-space:nowrap;
-}
-.tab-btn span{
-    font-size:14px;
-    font-weight:700;
-    opacity:.88;
-}
-
+/* 카테고리/기간 버튼 및 아이템 카드 CSS */
+.cat-tabs{ display:flex; gap:10px; margin-bottom:20px; flex-wrap:wrap; }
+.cat-btn{ padding:10px 16px; background:#fff; border:1px solid #edf0f5; border-radius:999px; color:#57606f; font-size:14px; font-weight:800; cursor:pointer; transition:all 0.2s ease; box-shadow:0 3px 10px rgba(0,0,0,.03); }
+.cat-btn:hover{ border-color:#ff6ba6; color:#ff6ba6; transform:translateY(-1px); }
+.cat-btn.active{ background:#ff6ba6; border-color:#ff6ba6; color:#fff; box-shadow:0 6px 14px rgba(255,107,166,.22); }
+.cat-content{ display:none; }
+.cat-content.active{ display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:14px; }
+.item-card{ display:flex; justify-content:space-between; align-items:center; gap:15px; padding:18px 20px; background:#fff; border:1px solid #f1f2f6; border-radius:18px; box-shadow:0 4px 14px rgba(0,0,0,.025); transition:all 0.2s ease; }
+.item-card:hover{ border-color:#ff6ba6; transform:translateY(-2px); }
+.i-name{ font-size:16px; font-weight:850; color:#2f3542; line-height:1.35; word-break:keep-all; }
+.i-price{ min-width:105px; text-align:right; color:#ff6ba6; font-size:15px; font-weight:900; white-space:nowrap; }
+.tab-btn span{ font-size:14px; font-weight:700; opacity:.88; }
 
 /* 📱 모바일 최적화 */
 @media (max-width: 768px) {
@@ -163,6 +115,7 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
     .cat-content.active { grid-template-columns: 1fr; }
     .item-card { align-items:flex-start; flex-direction:column; }
     .i-price { text-align:left; }
+    .modal-box { width: 95%; padding: 25px; }
 }
 </style>
 </head>
@@ -233,21 +186,25 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
             <h2 style="margin-bottom:20px; font-size:24px;">📰 모찌 매거진 최신 뉴스</h2>
             <div class="news-list">
                 {% for news in news_list %}
-                <div class="news-card">
+                <!-- 🌟 카드를 클릭하면 팝업 열기 함수 실행! -->
+                <div class="news-card" onclick="openNewsModal(this)">
+                    <!-- 데이터를 숨겨두어 자바스크립트가 읽어갈 수 있도록 합니다 -->
+                    <input type="hidden" class="raw-id" value="{{ news.id }}">
+                    <input type="hidden" class="raw-title" value="{{ news.title }}">
+                    <input type="hidden" class="raw-author" value="{{ news.author }}">
+                    <input type="hidden" class="raw-date" value="{{ news.date }}">
+                    <input type="hidden" class="raw-img" value="{{ news.image_url }}">
+                    <textarea class="raw-content" style="display:none;">{{ news.content }}</textarea>
+
                     <div class="n-header">
                         <span class="n-author">{{ news.author }}</span>
                         <span class="n-date">{{ news.date }}</span>
                     </div>
-                    <h3 class="n-title">{{ news.title }}</h3>
-                    
-                    <!-- 💡 사진이 있다면 여기에 출력됩니다! -->
                     {% if news.image_url %}
-                    <div style="margin-bottom: 20px; text-align: center;">
-                        <img src="{{ news.image_url }}" alt="뉴스 이미지" style="max-width: 100%; max-height: 400px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
-                    </div>
+                        <img src="{{ news.image_url }}" class="n-img" alt="뉴스 이미지">
                     {% endif %}
-                    
-                    <div class="n-content">{{ news.content }}</div>
+                    <h3 class="n-title">{{ news.title }}</h3>
+                    <div class="n-content-preview">{{ news.content }}</div>
                 </div>
                 {% endfor %}
             </div>
@@ -340,6 +297,31 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
     </main>
 </div>
 
+<!-- 🌟 집중 모드 뉴스 팝업창 (모달) 🌟 -->
+<div id="newsModal" class="modal-overlay" onclick="closeNewsModal(event)">
+    <div class="modal-box" onclick="event.stopPropagation()">
+        <span class="modal-close" onclick="closeNewsModal()">×</span>
+        <button class="modal-edit-btn" onclick="startEditMode()">수정</button>
+        
+        <!-- 읽기 모드 영역 -->
+        <div id="modal-read-area">
+            <div style="font-size: 13px; color: #ff6ba6; font-weight: bold; margin-bottom: 10px;" id="modal-info"></div>
+            <h2 id="modal-title" style="font-size: 26px; margin-bottom: 20px; color: #2f3542;"></h2>
+            <img id="modal-img" src="" style="width: 100%; border-radius: 16px; margin-bottom: 20px; display: none;">
+            <!-- white-space: pre-wrap 적용으로 가독성 완벽 해결 -->
+            <div id="modal-content" class="modal-text"></div>
+        </div>
+
+        <!-- 편집 모드 영역 -->
+        <div id="modal-edit-area" style="display: none; margin-top: 20px;">
+            <h3 style="margin-bottom: 15px; color: #ff6ba6;">✍️ 기사 수정 모드</h3>
+            <input type="text" id="edit-title" class="edit-input" placeholder="기사 제목">
+            <textarea id="edit-content" class="edit-textarea" placeholder="기사 내용"></textarea>
+            <button onclick="saveNewsEdit()" style="width: 100%; background: #ff6ba6; color: white; padding: 15px; border-radius: 12px; border: none; font-size: 16px; font-weight: bold; cursor: pointer; margin-top: 10px;">저장 후 서버에 업데이트</button>
+        </div>
+    </div>
+</div>
+
 <script>
     function switchPage(pageId, btnElement) {
         document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
@@ -370,27 +352,117 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
     }
 
     function switchCat(catId, btnElement) {
-        // 카테고리 버튼만 제어하도록 범위를 제한합니다.
-        // 검색 탭의 일간/주간/월간 버튼까지 active가 풀리는 문제를 방지합니다.
         document.querySelectorAll('#tab-list .cat-content').forEach(c => c.classList.remove('active'));
         document.querySelectorAll('#tab-list .cat-tabs .cat-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('cat-' + catId).classList.add('active');
         btnElement.classList.add('active');
     }
 
+    // ==========================================
+    // 🌟 뉴스 팝업창 & 수정 기능 JavaScript 🌟
+    // ==========================================
+    let currentNewsId = null;
+    const SUPABASE_URL = "https://lgjmpburuksnfspmizmr.supabase.co"; 
+    const SUPABASE_KEY = "sb_publishable_hJgDJqaZOvU1zF2E7x88Hg_wtxsJGdH";
+
+    function openNewsModal(card) {
+        currentNewsId = card.querySelector('.raw-id').value;
+        const title = card.querySelector('.raw-title').value;
+        const author = card.querySelector('.raw-author').value;
+        const date = card.querySelector('.raw-date').value;
+        const content = card.querySelector('.raw-content').value;
+        const img = card.querySelector('.raw-img').value;
+
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-info').innerText = author + " | " + date;
+        document.getElementById('modal-content').innerText = content;
+        
+        if(img && img !== 'None') {
+            document.getElementById('modal-img').src = img;
+            document.getElementById('modal-img').style.display = 'block';
+        } else {
+            document.getElementById('modal-img').style.display = 'none';
+        }
+
+        document.getElementById('modal-read-area').style.display = 'block';
+        document.getElementById('modal-edit-area').style.display = 'none';
+        
+        document.getElementById('newsModal').classList.add('active');
+        document.body.style.overflow = 'hidden'; 
+    }
+
+    function closeNewsModal(e) {
+        if (!e || e.target.id === 'newsModal' || e.target.className === 'modal-close') {
+            document.getElementById('newsModal').classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    function startEditMode() {
+        if(!currentNewsId) return;
+        
+        const password = prompt("기사를 수정하려면 관리자 비밀번호를 입력하세요.");
+        
+        // 💡 관리자 비밀번호 (원하시는 번호로 변경 가능합니다!)
+        if (password === "mochi1234") {
+            document.getElementById('modal-read-area').style.display = 'none';
+            document.getElementById('modal-edit-area').style.display = 'block';
+            
+            document.getElementById('edit-title').value = document.getElementById('modal-title').innerText;
+            document.getElementById('edit-content').value = document.getElementById('modal-content').innerText;
+        } else if (password !== null) {
+            alert("비밀번호가 일치하지 않습니다!");
+        }
+    }
+
+    async function saveNewsEdit() {
+        const newTitle = document.getElementById('edit-title').value;
+        const newContent = document.getElementById('edit-content').value;
+
+        if(!newTitle || !newContent) {
+            alert("제목과 내용을 모두 입력해 주세요!");
+            return;
+        }
+
+        try {
+            const response = await fetch(`${SUPABASE_URL}/rest/v1/mochi_news?id=eq.${currentNewsId}`, {
+                method: 'PATCH',
+                headers: {
+                    'apikey': SUPABASE_KEY,
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'Content-Type': 'application/json',
+                    'Prefer': 'return=minimal'
+                },
+                body: JSON.stringify({
+                    title: newTitle,
+                    content: newContent
+                })
+            });
+
+            if (response.ok) {
+                alert("✅ 기사가 성공적으로 수정되었습니다!");
+                location.reload(); 
+            } else {
+                alert("수정에 실패했습니다. DB 연결을 확인하세요.");
+            }
+        } catch (error) {
+            alert("오류가 발생했습니다: " + error);
+        }
+    }
+    // ==========================================
+
+
     // 데이터 검색 및 전역 관리 변수들
     const allLogs = {{ logs_json | safe }};
     let searchChartInstance = null;
-    let currentFilteredLogs = []; // 현재 검색된 아이템의 전체 로그 보관용
-    let currentPeriodDays = 7;    // 기본 필터 기간: 주간(7일)
+    let currentFilteredLogs = []; 
+    let currentPeriodDays = 7;    
 
-    // 문자열 날짜를 실제 Date 객체로 변환하는 함수 ("06/12 07:11" -> Date 객체)
     function parseLogDate(dateStr) {
         try {
             let parts = dateStr.split(' ');
             let md = parts[0].split('/');
             let hm = parts[1].split(':');
-            // 서버 시간 기준인 2026년으로 고정 계산
             return new Date(2026, parseInt(md[0]) - 1, parseInt(md[1]), parseInt(hm[0]), parseInt(hm[1]));
         } catch(e) {
             return new Date();
@@ -405,7 +477,6 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
         
         if (!keyword) return;
 
-        // 이름 매칭되는 데이터 필터링 후 날짜순 정렬
         currentFilteredLogs = allLogs.filter(log => log.name.includes(keyword))
                                      .sort((a, b) => parseLogDate(a.date) - parseLogDate(b.date));
 
@@ -416,7 +487,6 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
             return;
         }
 
-        // 1. 하단 표 채우기 (전체 내역 다 보여줌)
         let html = '';
         [...currentFilteredLogs].reverse().forEach(log => {
             html += `
@@ -433,7 +503,6 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
         });
         tbody.innerHTML = html;
 
-        // 필터 버튼 보이기 및 기본 주간(7일)으로 차트 그리기
         filterArea.style.display = "flex";
         document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('btn-period-week').classList.add('active');
@@ -442,7 +511,6 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
         updateChart();
     }
 
-    // 일간, 주간, 월간 버튼 클릭 시 처리
     function changePeriod(days, btnElement) {
         document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
         btnElement.classList.add('active');
@@ -450,16 +518,13 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
         updateChart();
     }
 
-    // 선택된 기간에 맞게 차트만 업데이트하는 함수
     function updateChart() {
         const chartArea = document.getElementById('searchChartArea');
         if (currentFilteredLogs.length === 0) return;
 
-        // 가장 최근 거래의 시간을 기준으로 잡음
         const latestLogDate = parseLogDate(currentFilteredLogs[currentFilteredLogs.length - 1].date);
-        const limitTime = currentPeriodDays * 24 * 60 * 60 * 1000; // 밀리초 계산
+        const limitTime = currentPeriodDays * 24 * 60 * 60 * 1000; 
 
-        // 기간 내에 속하는 데이터만 한 번 더 필터링
         let periodLogs = currentFilteredLogs.filter(log => {
             let logDate = parseLogDate(log.date);
             return (latestLogDate - logDate) <= limitTime;
@@ -470,7 +535,6 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
             return;
         }
 
-        // 4시간 단위로 주머니 채우기 (그룹화)
         let groupedData = {};
         periodLogs.forEach(log => {
             let key = log.date;
@@ -494,7 +558,6 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
         let chartLabels = Object.keys(groupedData);
         let chartPrices = chartLabels.map(key => Math.floor(groupedData[key].sum / groupedData[key].count));
 
-        // 차트 렌더링
         chartArea.style.display = "block";
         const ctx = document.getElementById('searchChart').getContext('2d');
         if (searchChartInstance) searchChartInstance.destroy();
@@ -521,7 +584,6 @@ header{height:70px; background:#fff; display:flex; align-items:center; justify-c
         });
     }
 
-    // 메인화면 7일 누적 통계 차트
     const chartLabels = {{ chart_labels | safe }};
     const chartData = {{ chart_data | safe }};
     const mainCtx = document.getElementById('tradeChart').getContext('2d');
