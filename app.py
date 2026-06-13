@@ -1,3 +1,5 @@
+import time
+import re
 from flask import Flask, render_template
 from supabase import create_client
 import json
@@ -8,7 +10,7 @@ SUPABASE_URL = "https://lgjmpburuksnfspmizmr.supabase.co"
 SUPABASE_KEY = "sb_publishable_hJgDJqaZOvU1zF2E7x88Hg_wtxsJGdH"
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
-# 🚗 1. 차량 전체 리스트
+# 🚗 원본 차량/스킨 리스트
 VEHICLE_NAMES = [
     "레온티스 비전", "데르조 MINI CAR", "파가시 바가리", "벤조 지마겐 10인승", "케칠", "케빠", "그랜절", 
     "롤케잌 미니카", "지퍼 미니카", "러브 미니카", "버거티 미니카", "벤티 MINI CAR", "피에로 MINI CAR", 
@@ -40,7 +42,6 @@ VEHICLE_NAMES = [
     "스즈키", "닌자", "알원", "스쿠터", "글래디에이터", "체로키 호크", "랭글러", "컴패스", "루비콘"
 ]
 
-# 👗 2. 스킨/치장 전체 리스트
 SKIN_NAMES = [
     "[운영팀스킨] 김은호", "[운영팀스킨] 김연주", "강필조님 개인스킨", "강필조님 개인스킨 #2", "강류안님 개인스킨", 
     "화임님 개인스킨", "희냥님 개인스킨", "빵재님 개인스킨", "구이든님 개인스킨", "서루님 개인스킨", "도경님 개인스킨", 
@@ -133,132 +134,163 @@ SKIN_NAMES = [
     "[개구리시리즈] 귀여운 개구리 어깨 오른쪽", "[개구리시리즈] 귀여운 개구리 막대", "귀여운 오리 세트"
 ]
 
-def format_korean_currency(num):
-    if num >= 1000000000000: return f"{num / 1000000000000:.1f}조 원".replace(".0조", "조")
-    elif num >= 100000000: return f"{num / 100000000:.1f}억 원".replace(".0억", "억")
-    elif num >= 10000: return f"{num // 10000}만 원"
-    else: return f"{num} 원"
+CHIJANG_KEYWORDS = ["치장", "의자", "칭호", "날개", "테트리스", "가방", "마스크", "모자", "머리띠", "붕어", "하트", "영혼", "뼈다귀", "곰", "고양이", "마법진", "메이드", "가마솥", "유령", "스크림", "인형", "지팡이", "마법서", "달빛", "이펙트", "칫솔", "치약", "배게", "브로치", "백팩", "풍선", "서클", "슬리퍼", "귀", "뿔", "꼬리", "당고", "버블툴", "튜브", "선글라스", "아이스바", "반지", "갱", "효과", "불손", "스모그", "해트", "피카츄", "삼도류", "고기", "망토", "수리검", "구미", "파쿤", "주문서", "낫", "미니언즈", "꽃잎", "선풍기", "꽃관", "물총", "양동이", "복돼지", "외계토끼", "천사링", "캔디", "고질라", "이샤르", "양모펠트", "심즈", "왕관", "포켓몬", "TowerofPower", "CryoHops", "Butterfly", "Mainframe", "Wingedfury", "DemonHunter", "FuzzyBear", "Medusa", "Razor", "Street", "devil_wing", "rabbit_hat", "조명", "헤드셋", "책가방", "베이비베어", "드래곤", "애비츄", "사과", "츄", "신세계시즌1", "붕어시리즈", "오리시리즈", "판다시리즈", "아기시리즈", "개구리시리즈", "오리세트"]
 
+# 박스/상자는 차량박스, 스킨박스에도 들어가므로 제일 먼저 아이템 처리하면 오분류됩니다.
+# 그래서 명확한 아이템성 단어만 먼저 검사하고, 박스/상자는 마지막 fallback에서만 아이템 처리합니다.
+FORCE_ITEM_PRIORITY = ["뽑기권", "신청권", "교환권", "티켓", "조각", "부품", "포장키트", "이용권", "입장권", "분해권"]
+GENERIC_ITEM_WORDS = ["상자", "박스"]
+
+# 원본 리스트에 누락되거나 이름 표기가 자주 흔들리는 차량 보험 키워드
+FALLBACK_VEHICLES = [
+    "차량박스", "개인차량", "개인보트", "미니카", "MINI CAR", "오토바이", "스쿠터", "보트",
+    "벤조", "f80", "보네노", "MINI", "그랜절", "웰시코기", "웨시코기", "닌자커스텀",
+    "환다", "피에로", "EP9", "비엠", "포코", "마카시", "솔라리", "솔라리 비전",
+    "스트라이크", "스트라이크 비전", "볼레드", "아폴로", "데르조", "양카", "차량"
+]
+
+MARKET_NOISE_WORDS = [
+    "차량박스", "스킨박스", "치장박스", "아이템박스", "일반아이템", "일반아이템박스",
+    "차량", "스킨", "치장", "상자", "박스"
+]
+
+# 기호/띄어쓰기/대소문자를 통일해서 비교합니다.
+def normalize(text):
+    return re.sub(r'[^가-힣a-zA-Z0-9]', '', str(text)).lower()
+
+
+def strip_market_noise(norm_text):
+    cleaned = norm_text
+    for word in sorted([normalize(w) for w in MARKET_NOISE_WORDS], key=len, reverse=True):
+        cleaned = cleaned.replace(word, '')
+    return cleaned
+
+
+def make_candidates(item_name):
+    norm_name = normalize(item_name)
+    stripped = strip_market_noise(norm_name)
+    candidates = [norm_name]
+    if stripped and stripped != norm_name:
+        candidates.append(stripped)
+    return candidates
+
+
+def prepare_patterns(values):
+    return sorted({normalize(v) for v in values if normalize(v)}, key=len, reverse=True)
+
+
+NORM_VEHICLES = prepare_patterns(VEHICLE_NAMES)
+NORM_SKINS = prepare_patterns(SKIN_NAMES)
+NORM_CHIJANG = prepare_patterns(CHIJANG_KEYWORDS)
+NORM_FORCE_ITEMS = prepare_patterns(FORCE_ITEM_PRIORITY)
+NORM_GENERIC_ITEMS = prepare_patterns(GENERIC_ITEM_WORDS)
+NORM_FALLBACK = prepare_patterns(FALLBACK_VEHICLES)
+
+
+def match_any(candidates, patterns, allow_reverse=True):
+    for candidate in candidates:
+        if not candidate:
+            continue
+        for pattern in patterns:
+            if not pattern:
+                continue
+            # 보통은 "차량박스솔라리비전" 안에 "솔라리비전"이 들어있는 형태입니다.
+            if pattern in candidate:
+                return True
+            # DB에 "볼레드"처럼 짧게 들어오고 리스트에는 더 긴 표기가 있을 때를 보정합니다.
+            if allow_reverse and len(candidate) >= 3 and candidate in pattern:
+                return True
+    return False
+
+
+# 카테고리 도출: 차량/스킨/치장을 먼저 잡고, 진짜 일반 아이템은 마지막에 보냅니다.
 def get_category(item_name):
-    for v in VEHICLE_NAMES:
-        if v in item_name: return "차량"
-    for s in SKIN_NAMES:
-        if s in item_name: return "스킨"
-        
-    force_items = ["뽑기권", "신청권", "교환권", "티켓", "조각", "상자", "박스", "부품", "포장키트", "이용권", "입장권", "분해권"]
-    for f in force_items:
-        if f in item_name: return "아이템"
+    candidates = make_candidates(item_name)
+    norm_name = candidates[0]
 
-    skins = ["스킨", "커스텀", "치장", "의자", "칭호", "날개", "테트리스", "코스튬"]
-    for s in skins:
-        if s in item_name: return "스킨"
-        
+    # 1. 실제 차량명 우선: 차량박스/박스/상자 단어 때문에 일반 아이템으로 빠지는 문제 방지
+    if match_any(candidates, NORM_VEHICLES) or match_any(candidates, NORM_FALLBACK, allow_reverse=False):
+        return "차량"
+
+    # 2. 스킨/치장 리스트 우선
+    if match_any(candidates, NORM_SKINS):
+        if match_any(candidates, NORM_CHIJANG, allow_reverse=False):
+            return "치장"
+        return "스킨"
+
+    # 3. 치장 키워드가 직접 들어간 경우
+    if match_any(candidates, NORM_CHIJANG, allow_reverse=False):
+        return "치장"
+
+    # 4. 스킨 키워드가 직접 들어간 경우
+    if any(k in norm_name for k in ["스킨", "커스텀", "코스튬"]):
+        return "스킨"
+
+    # 5. 명확한 소모품/권/티켓류는 일반 아이템
+    if match_any(candidates, NORM_FORCE_ITEMS, allow_reverse=False):
+        return "아이템"
+
+    # 6. 박스/상자는 앞에서 차량/스킨/치장으로 못 잡힌 것만 일반 아이템
+    if match_any(candidates, NORM_GENERIC_ITEMS, allow_reverse=False):
+        return "아이템"
+
     return "아이템"
+
+CACHE = {
+    "market_data": None,
+    "news_data": None,
+    "last_updated": 0
+}
+CACHE_TIME = 300 
 
 @app.route("/")
 def home():
-    try:
-        # 🌟 수파베이스에서 3만개 데이터를 안전하게 한방에 가져옵니다.
-        response = supabase.table("mochi_market").select("*").order("created_at", desc=True).limit(30000).execute()
-        all_data = response.data
-    except Exception as e:
-        print("시세 데이터 로딩 오류:", e)
-        all_data = []
+    current_time = time.time()
+    
+    if CACHE["market_data"] is None or (current_time - CACHE["last_updated"]) > CACHE_TIME:
+        try:
+            res_market = supabase.table("mochi_market").select("*").order("created_at", desc=True).limit(40000).execute()
+            CACHE["market_data"] = res_market.data
+            
+            res_news = supabase.table("mochi_news").select("*").order("created_at", desc=True).limit(100).execute()
+            CACHE["news_data"] = res_news.data
+            
+            CACHE["last_updated"] = current_time
+        except Exception as e:
+            print("데이터 로딩 오류:", e)
+            if CACHE["market_data"] is None: CACHE["market_data"] = []
+            if CACHE["news_data"] is None: CACHE["news_data"] = []
 
-    total_trade_count = len(all_data)
-    total_trade_value = 0
-    item_stats = {}
+    all_data = CACHE["market_data"]
+    raw_news_data = CACHE["news_data"]
+
     clean_logs = []
-    daily_stats = {}
-
     for row in all_data:
-        name = row.get('item_name', '')
-        qty = row.get('quantity', 0)
-        total_p = row.get('total_price', 0)
         date_raw = row.get('created_at', '')
-
-        # 🌟 연도가 빠짐없이 추출되도록 수정 완료
-        if date_raw:
-            year = date_raw[0:4] 
-            month_day = date_raw[5:10].replace('-', '/')
-            time_str = date_raw[11:16]
-            date_short = f"{year}/{month_day} {time_str}" 
-            date_only = f"{year}/{month_day}" 
+        if date_raw and len(date_raw) >= 16:
+            date_short = date_raw[:16].replace('-', '/').replace('T', ' ')
         else:
             date_short = "Unknown"
-            date_only = "Unknown"
 
-        total_trade_value += total_p
-
-        if name not in item_stats:
-            item_stats[name] = {'count': 0, 'volume': 0, 'value': 0}
-        item_stats[name]['count'] += 1
-        item_stats[name]['volume'] += qty
-        item_stats[name]['value'] += total_p
+        item_name = row.get('item_name', '')
+        # 🌟 파이썬이 강철 엔진으로 100% 무결점 분류해서 프론트로 쏴줍니다!
+        category = get_category(item_name)
 
         clean_logs.append({
-            'name': name,
-            'qty': qty,
-            'total_price': total_p,
-            'unit_price': total_p // qty if qty > 0 else 0,
+            'name': item_name,
+            'qty': row.get('quantity', 0),
+            'total_price': row.get('total_price', 0),
+            'unit_price': row.get('total_price', 0) // row.get('quantity', 1) if row.get('quantity', 0) > 0 else 0,
             'seller': row.get('seller', '알 수 없음'),
             'buyer': row.get('buyer', '알 수 없음'),
-            'date': date_short
+            'date': date_short,
+            'category': category # HTML아, 넌 계산하지 말고 주는 대로 받아먹어라!
         })
-
-        if date_only != "Unknown":
-            if date_only not in daily_stats:
-                daily_stats[date_only] = 0
-            daily_stats[date_only] += total_p
-
-    summary_data = {
-        'count': total_trade_count, 
-        'value': format_korean_currency(total_trade_value), 
-        'avg': format_korean_currency(total_trade_value // total_trade_count if total_trade_count > 0 else 0)
-    }
-
-    sorted_items = sorted(item_stats.items(), key=lambda x: x[1]['count'], reverse=True)
-    top_10 = [{'name': k, 'count': v['count']} for k, v in sorted_items[:10]]
-
-    categorized_items = {"차량": [], "스킨": [], "아이템": []}
-    for name, stats in item_stats.items():
-        cat = get_category(name)
-        avg_price = stats['value'] // stats['volume'] if stats['volume'] > 0 else 0
-        categorized_items[cat].append({
-            'name': name,
-            'count': stats['count'],
-            'avg_price': format_korean_currency(avg_price)
-        })
-    
-    for cat in categorized_items:
-        categorized_items[cat] = sorted(categorized_items[cat], key=lambda x: x['count'], reverse=True)
-
-    sorted_dates = sorted(daily_stats.keys()) 
-    latest_dates = sorted_dates[-7:]
-    
-    # 만약 연도가 포함된 YYYY/MM/DD 포맷이면 차트에서는 연도를 뺍니다
-    chart_labels = []
-    for d in latest_dates:
-        if len(d) > 5: chart_labels.append(d[5:])
-        else: chart_labels.append(d)
-        
-    chart_data = [daily_stats[d] for d in latest_dates]
-
-    try:
-        news_response = supabase.table("mochi_news").select("*").order("created_at", desc=True).limit(100).execute()
-        raw_news_data = news_response.data
-    except Exception as e:
-        print("뉴스 데이터 오류:", e)
-        raw_news_data = []
 
     real_news_list = []
     for news in raw_news_data:
         raw_date = news.get('created_at', '')
-        if raw_date:
-            clean_date = raw_date.split('.')[0].replace('T', ' ')[:-3] 
-        else:
-            clean_date = "방금 전"
-
+        clean_date = raw_date.split('.')[0].replace('T', ' ')[:-3] if raw_date else "방금 전"
         real_news_list.append({
             "title": news.get('title', '제목 없음'),
             "author": news.get('author', '익명 기자'),
@@ -267,14 +299,7 @@ def home():
             "image_url": news.get('image_url', '')
         })
 
-    return render_template("index.html", 
-                           summary=summary_data, 
-                           top_10=top_10, 
-                           cat_items=categorized_items,
-                           logs_json=json.dumps(clean_logs),
-                           chart_labels=json.dumps(chart_labels),
-                           chart_data=json.dumps(chart_data),
-                           news_list=real_news_list)
+    return render_template("index.html", logs_json=json.dumps(clean_logs), news_list=real_news_list)
 
 if __name__ == "__main__":
     app.run(debug=True, port=5000)
