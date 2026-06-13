@@ -6,7 +6,6 @@
 <title>MOCHI MARKET & NEWS</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- 🌟 깜빡임 방지: 페이지 로딩 전 다크모드 설정 불러오기 -->
 <script>
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -273,7 +272,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 <header>
     <div class="logo">🐱 모찌 소식</div>
-    <!-- 다크 모드 토글 -->
     <button id="darkModeToggle" class="theme-btn" onclick="toggleDarkMode()" title="다크 모드 전환">🌙</button>
     
     <nav class="top-nav">
@@ -285,7 +283,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 <div class="layout">
     <aside class="sidebar">
-        <!-- 누적 거래 현황 -->
         <div class="side-box">
             <div class="side-title">누적 거래 현황 <span class="badge">최근 7일</span></div>
             <div class="summary-item"><span>총 거래 건수</span><strong id="summary-count">- 건</strong></div>
@@ -293,7 +290,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
             <div class="summary-item"><span>평균 거래 단가</span><strong id="summary-avg">- 원</strong></div>
         </div>
 
-        <!-- 인기 거래 TOP 10 -->
         <div class="side-box">
             <div class="side-title">🔥 인기 거래 TOP 10 <span class="badge-blue">최근 2주</span></div>
             <ul class="rank-list" id="sidebar-rank-list"></ul>
@@ -303,7 +299,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     <main>
         <div id="page-home" class="page-section active">
             
-            <!-- 슬라이드쇼 히어로 배너 -->
             <section class="hero">
                 <div id="heroSliderBg"></div>
                 <div class="hero-overlay"></div>
@@ -414,7 +409,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
                     <canvas id="searchChart"></canvas>
                 </div>
 
-                <!-- 🌟 표 가로 스크롤 허용 🌟 -->
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -445,7 +439,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     </main>
 </div>
 
-<!-- 🌟 푸터 (Footer) 영역 -->
 <footer class="site-footer">
     <div class="footer-content">
         <div class="footer-col">
@@ -469,7 +462,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     </div>
 </footer>
 
-<!-- 팝업창 (모달) -->
 <div id="newsModal" class="modal-overlay" onclick="closeNewsModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeNewsModal()">×</span>
@@ -650,14 +642,30 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     const rawLogs = {{ logs_json | safe }};
     let latestTime = 0;
 
-    // 🌟 파이썬이 던져준 YYYY/MM/DD 날짜를 완벽하게 인식하도록 수정!
+    // 🌟 연도를 완벽하게 인식해서 타임머신 오류를 막아주는 초강력 방어코드 🌟
     function parseLogDate(dateStr) {
         try {
-            let parts = dateStr.split(' ');
-            let ymd = parts[0].split('/'); // 이제 [2026, 06, 13] 이 됩니다.
-            let hm = parts[1].split(':');
-            return new Date(parseInt(ymd[0]), parseInt(ymd[1]) - 1, parseInt(ymd[2]), parseInt(hm[0]), parseInt(hm[1]));
-        } catch(e) { return new Date(); }
+            // dateStr 예시: "2026/06/13 11:13"
+            let parts = dateStr.split(' '); 
+            let ymd = parts[0].split('/'); 
+            let hm = (parts[1] || "00:00").split(':');
+            
+            let y = 2026, m = 0, d = 1;
+            
+            if (ymd.length === 3) {
+                y = parseInt(ymd[0]);
+                m = parseInt(ymd[1]) - 1; // 자바스크립트는 1월이 0입니다
+                d = parseInt(ymd[2]);
+            } else if (ymd.length === 2) {
+                y = 2026;
+                m = parseInt(ymd[0]) - 1;
+                d = parseInt(ymd[1]);
+            }
+            
+            let parsed = new Date(y, m, d, parseInt(hm[0]||0), parseInt(hm[1]||0));
+            if (isNaN(parsed.getTime())) return new Date(2026, 0, 1);
+            return parsed;
+        } catch(e) { return new Date(2026, 0, 1); }
     }
 
     const allLogs = rawLogs.map(log => {
@@ -814,9 +822,13 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
         let html = '';
         [...currentFilteredLogs].reverse().forEach(log => {
+            // 🌟 2026/06/13 에서 연도 부분을 잘라내어 화면에는 06/13 만 예쁘게 띄워줍니다
+            let displayDate = log.date;
+            if (displayDate.length > 10) displayDate = displayDate.substring(5);
+
             html += `
                 <tr style="border-bottom:1px solid var(--border-main); transition:0.2s;" onmouseover="this.style.backgroundColor='var(--bg-hover-table)'" onmouseout="this.style.backgroundColor='transparent'">
-                    <td style="color:var(--text-muted); font-size:13.5px; font-weight:600;">${log.date}</td>
+                    <td style="color:var(--text-muted); font-size:13.5px; font-weight:600;">${displayDate}</td>
                     <td style="font-weight:800; color:var(--text-main);">${log.name}</td>
                     <td style="font-weight:600; color:var(--text-sub);">${log.qty.toLocaleString()}개</td>
                     <td style="color:var(--pink-main); font-weight:800;">${formatKRW(log.unit_price)}</td>
@@ -859,12 +871,13 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
             let key = log.date;
             try {
                 let parts = log.date.split(' ');
-                if (parts.length === 2) {
-                    let datePart = parts[0].substring(5); // 🌟 차트 예쁘게 나오도록 연도 자르기 (2026/06/13 -> 06/13)
-                    let hourPart = parseInt(parts[1].split(':')[0]);
-                    let groupHour = Math.floor(hourPart / 4) * 4;
-                    key = `${datePart} ${String(groupHour).padStart(2, '0')}:00`;
+                let datePart = parts[0];
+                if (datePart.split('/').length === 3) {
+                    datePart = datePart.split('/').slice(1).join('/'); 
                 }
+                let hourPart = parseInt(parts[1].split(':')[0]);
+                let groupHour = Math.floor(hourPart / 4) * 4;
+                key = `${datePart} ${String(groupHour).padStart(2, '0')}:00`;
             } catch(e) {}
             if (!groupedData[key]) { groupedData[key] = { sum: 0, count: 0 }; }
             groupedData[key].sum += log.unit_price;
