@@ -6,10 +6,7 @@
 <title>MOCHI MARKET & NEWS</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script type="module">
-    import imglyRemoveBackground from "https://unpkg.com/@imgly/background-removal@1.4.3/dist/index.mjs";
-    window.mochiRemoveBg = imglyRemoveBackground;
-</script>
+<script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/bundle.js"></script>
 
 <script>
     const savedTheme = localStorage.getItem('theme') || 'light';
@@ -95,6 +92,8 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(15px); 
 .theme-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 10px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
 .theme-btn:hover { transform: scale(1.1); background: var(--bg-hover); }
 
+.top-nav::-webkit-scrollbar, .tabs::-webkit-scrollbar, .cat-tabs::-webkit-scrollbar, .table-responsive::-webkit-scrollbar { display: none; }
+
 .layout { max-width:1440px; margin:35px auto; padding:0 25px; display:grid; grid-template-columns:320px 1fr; gap:35px; min-height: 80vh; }
 .sidebar { display:flex; flex-direction:column; gap:25px; height:fit-content; position:sticky; top:110px; }
 
@@ -146,7 +145,6 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(15px); 
 .news-card:hover { border-color:var(--pink-main); transform:translateY(-6px); box-shadow:0 15px 35px var(--pink-light); }
 .n-header { display:flex; justify-content:space-between; margin-bottom:15px; font-size:13px; color:var(--text-muted); font-weight: 600;}
 .n-author { font-weight:800; color:var(--pink-main); background: var(--pink-light); padding: 4px 10px; border-radius: 8px;}
-.n-date { font-size:13px; color:var(--text-muted); }
 .n-title { font-size:19px; margin-bottom:12px; color:var(--text-main); line-height:1.4; font-weight:800; letter-spacing: -0.5px;}
 .n-content-preview { font-size:14.5px; color:var(--text-sub); line-height:1.6; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1; }
 .n-img { width:100%; height:190px; object-fit:cover; border-radius:16px; margin-bottom:18px; background:var(--border-main); }
@@ -207,7 +205,6 @@ table td { border-bottom: 1px solid var(--border-main); }
 .footer-col ul li a:hover { color: var(--pink-main); }
 .footer-bottom { max-width: 1400px; margin: 0 auto; border-top: 1px solid var(--border-main); padding-top: 25px; text-align: center; color: var(--text-muted); font-size: 13.5px; font-weight: 500; }
 
-/* 🌟 모달 팝업 구조 레이아웃 완벽 락인 (하단 삐져나옴 에러 해결) */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; display: none; align-items: center; justify-content: center; backdrop-filter: blur(8px); }
 .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
 .modal-box { background: var(--bg-card); width: 90%; max-width: 680px; border-radius: 28px; padding: 45px; position: relative; max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid var(--border-main); }
@@ -218,6 +215,35 @@ table td { border-bottom: 1px solid var(--border-main); }
 .modal-edit-btn:hover { background: var(--pink-main); color: white; }
 .edit-input, .edit-textarea { width: 100%; padding: 18px; border-radius: 14px; border: 2px solid var(--border-main); margin-bottom: 15px; font-size: 16px; font-family: inherit; font-weight: 600; outline: none; background: var(--bg-input); color: var(--text-main);}
 .edit-textarea { height: 350px; resize: vertical; line-height: 1.6; }
+
+@media (max-width: 768px) {
+    header { flex-direction: row; height: auto; padding: 15px 20px 0; }
+    .logo { flex: 1; font-size: 22px; }
+    .theme-btn { margin-left: auto; padding: 5px; }
+    .top-nav { width: 100%; justify-content: flex-start; overflow-x: auto; white-space: nowrap; padding-bottom: 5px; border-top: 1px solid var(--border-main); margin-top: 10px; padding-top: 5px; gap: 10px; }
+    .top-nav a { font-size: 15px; padding: 12px 10px; }
+    .layout { display: flex; flex-direction: column; margin: 15px auto; padding: 0 15px; gap: 25px; }
+    main { order: 1; }
+    .sidebar { order: 2; position: static; height: auto; }
+    .hero { padding: 45px 25px; border-radius: 20px; margin-bottom: 20px; }
+    .hero-content h1 { font-size: 32px; }
+    .home-cards { grid-template-columns: 1fr; gap: 15px; }
+    .tabs { flex-direction: row; overflow-x: auto; white-space: nowrap; padding-bottom: 10px; }
+    .tab-btn { flex: 0 0 auto; padding: 16px 20px; font-size: 16px; }
+    .tab-btn span { display: none; } 
+    .search-container { flex-direction: column; gap: 10px; margin-bottom: 15px; }
+    .search-input { width: 100%; padding: 15px; }
+    .search-btn { width: 100%; padding: 15px; }
+    .period-filter-area { gap: 6px; }
+    .period-filter-area .cat-btn { flex: 1; padding: 12px 0; font-size: 13.5px; }
+    .cat-tabs { overflow-x: auto; white-space: nowrap; flex-wrap: nowrap; padding-bottom: 5px; }
+    .cat-btn { flex: 0 0 auto; }
+    .cat-content.active { grid-template-columns: 1fr; gap: 12px; }
+    .chart-container { height: 220px; margin-bottom: 20px; }
+    .footer-content { grid-template-columns: 1fr; gap: 30px; text-align: center; }
+    .footer-col { align-items: center; }
+    .site-footer { padding: 40px 20px 25px; margin-top: 40px; }
+}
 </style>
 </head>
 <body>
@@ -477,7 +503,7 @@ table td { border-bottom: 1px solid var(--border-main); }
         filterMarketList();
     }
 
-    // 🌟 안전하게 수정된 AI 누끼 연동 리스너
+    // 🌟 확실하게 동작하는 전통적인 AI 로딩 엔진
     async function processImageForRemoval(file) {
         if (!file) return;
         const spinner = document.getElementById('loadingRemover');
@@ -489,13 +515,13 @@ table td { border-bottom: 1px solid var(--border-main); }
             output.style.display = 'none';
             dlBtn.style.display = 'none';
 
-            if (!window.mochiRemoveBg) {
-                alert('AI 엔진 모듈을 불러오는 중입니다. 잠시만 기다린 후 다시 시도해 주세요!');
-                spinner.style.display = 'none';
+            // 모듈 대신 스크립트로 불러왔으므로 window 영역에 전역으로 세팅된 imglyRemoveBackground를 사용!
+            if (typeof imglyRemoveBackground === 'undefined') {
+                alert('AI 엔진이 아직 서버에서 완전히 로드되지 않았습니다. 잠시만 기다려주세요.');
                 return;
             }
 
-            const blob = await window.mochiRemoveBg(file);
+            const blob = await imglyRemoveBackground(file);
             const url = URL.createObjectURL(blob);
             output.src = url;
             output.style.display = 'block';
@@ -646,7 +672,6 @@ table td { border-bottom: 1px solid var(--border-main); }
 
     const rawLogs = {{ logs_json | safe }};
     let latestTime = 0;
-
     const SIX_MONTHS = 180 * 24 * 60 * 60 * 1000;
     const FOURTEEN_DAYS = 14 * 24 * 60 * 60 * 1000;
 
@@ -671,16 +696,9 @@ table td { border-bottom: 1px solid var(--border-main); }
         if(t > latestTime) latestTime = t; 
 
         let originalName = log.name;
-        let cat = '아이템';
-        let prefix = '[📦] ';
-
-        if ( (/🚗|티어\]|차량박스|벤조|f80|스쿠터|보네노|MINI|그랜절|웨시코기|닌자커스텀|환다|피에로|EP9|비엠|포코|마카시|솔라리|스트라이크|아폴로|데르조|양카/i.test(originalName)) && !originalName.includes('분해권') && !originalName.includes('도색권') ) {
-            cat = '차량'; prefix = '[🚗] ';
-        } else if (/👕|스킨/i.test(originalName)) {
-            cat = '스킨'; prefix = '[👕] ';
-        } else if (/🧸|🪑|✨|치장|의자|가방|마스크|날개|모자|머리띠|붕어/i.test(originalName)) {
-            cat = '치장'; prefix = '[✨] ';
-        }
+        // 🌟 파이썬에서 넘겨준 정확한 카테고리를 그대로 적용!
+        let cat = log.category || '아이템';
+        let prefix = cat === '차량' ? '[🚗] ' : cat === '스킨' ? '[👕] ' : cat === '치장' ? '[✨] ' : '[📦] ';
 
         let cleanName = originalName.replace(/\[.*?\]/g, '').replace(/【.*?】/g, '').replace(/<.*?>/g, '').replace(/스킨박스#/g, '').replace(/차량박스#/g, '').replace(/[🚗👕🧸🪑✨📦🧩🎫🎣]/g, '').trim();
         if (!cleanName) cleanName = originalName.replace(/\[.*?\]/g, '').trim() || originalName;
@@ -906,7 +924,6 @@ table td { border-bottom: 1px solid var(--border-main); }
         });
     }
 
-    // 🌟 6개월간 대규모 통계 그래프 연산 엔진 (Jinja 흔적 제거 및 완벽 독립 구동)
     let mainChartInstance = null;
     function renderMainChart() {
         let monthlyStats = {};
@@ -956,7 +973,7 @@ table td { border-bottom: 1px solid var(--border-main); }
         renderSummary(); 
         renderTop10(); 
         renderCategories(); 
-        renderMainChart(); // 6개월 차트 안정적 실행
+        renderMainChart();
     };
 </script>
 </body>
