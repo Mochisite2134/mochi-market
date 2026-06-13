@@ -40,9 +40,8 @@ VEHICLE_NAMES = [
     "스즈키", "닌자", "알원", "스쿠터", "글래디에이터", "체로키 호크", "랭글러", "컴패스", "루비콘"
 ]
 
-# 👗 2. 스킨/치장 전체 리스트 (어제 스킨 + 오늘 주신 방대한 치장 완벽 통합!)
+# 👗 2. 스킨/치장 전체 리스트
 SKIN_NAMES = [
-    # --- 어제 받은 스킨 리스트 ---
     "[운영팀스킨] 김은호", "[운영팀스킨] 김연주", "강필조님 개인스킨", "강필조님 개인스킨 #2", "강류안님 개인스킨", 
     "화임님 개인스킨", "희냥님 개인스킨", "빵재님 개인스킨", "구이든님 개인스킨", "서루님 개인스킨", "도경님 개인스킨", 
     "도준님 개인스킨", "구룡님 개인스킨 #2", "빵재님 개인스킨#2", "구상만님 개인스킨", "라임님 개인스킨", 
@@ -81,8 +80,6 @@ SKIN_NAMES = [
     "동휘1", "피메일", "포스", "킹", "렌고쿠", "스크위드", "스크위드1", "스크위드2", "스크위드3", 
     "어몽어스 블랙위도우", "어몽어스 캡틴아메리카V2", "어몽어스 헐크V2", "어몽어스 아이언맨", "어몽어스 토르", 
     "후몽", "낄만여스킨", "코트입은남자", "키작은여자버전", "키작은여자잠옷버전",
-    
-    # --- 오늘 받은 대규모 치장 리스트 ---
     "무지개 깃발", "천사의 하트(할로윈)", "악마의 하트(할로윈)", "영혼(할로윈)", "뼈다귀(할로윈)", "악마 곰(할로윈)", 
     "할로윈 고양이(할로윈)", "호박 고양이(할로윈)", "마녀 고양이(할로윈)", "불꽃 영혼(할로윈)", "호박 영혼(할로윈)", 
     "마녀의 달(할로윈)", "검은 마법진(할로윈)", "호박 메이드(할로윈)", "영혼 마법진(할로윈)", "마녀의 가마솥(할로윈)", 
@@ -143,34 +140,29 @@ def format_korean_currency(num):
     else: return f"{num} 원"
 
 def get_category(item_name):
-    # 0순위: 절대 리스트 (가장 강력한 규칙)
     for v in VEHICLE_NAMES:
         if v in item_name: return "차량"
-        
     for s in SKIN_NAMES:
         if s in item_name: return "스킨"
         
-    # 1순위: 일반 아이템 강제 필터 (교환권/조각 등은 무조건 아이템)
     force_items = ["뽑기권", "신청권", "교환권", "티켓", "조각", "상자", "박스", "부품", "포장키트", "이용권", "입장권", "분해권"]
     for f in force_items:
         if f in item_name: return "아이템"
 
-    # 2순위: 기타 스킨/치장 키워드 보험
     skins = ["스킨", "커스텀", "치장", "의자", "칭호", "날개", "테트리스", "코스튬"]
     for s in skins:
         if s in item_name: return "스킨"
         
-    # 3순위: 그 외 나머지는 전부 일반 아이템!
     return "아이템"
 
 @app.route("/")
 def home():
-    # 1. 시세 데이터 가져오기
     try:
-        response = supabase.table("mochi_market").select("*").order("created_at", desc=True).execute()
+        # 🌟 수파베이스에서 3만개 데이터를 안전하게 한방에 가져옵니다.
+        response = supabase.table("mochi_market").select("*").order("created_at", desc=True).limit(30000).execute()
         all_data = response.data
     except Exception as e:
-        print("시세 데이터 오류:", e)
+        print("시세 데이터 로딩 오류:", e)
         all_data = []
 
     total_trade_count = len(all_data)
@@ -180,16 +172,18 @@ def home():
     daily_stats = {}
 
     for row in all_data:
-        name = row['item_name']
-        qty = row['quantity']
-        total_p = row['total_price']
-        date_raw = row['created_at']
+        name = row.get('item_name', '')
+        qty = row.get('quantity', 0)
+        total_p = row.get('total_price', 0)
+        date_raw = row.get('created_at', '')
 
+        # 🌟 연도가 빠짐없이 추출되도록 수정 완료
         if date_raw:
+            year = date_raw[0:4] 
             month_day = date_raw[5:10].replace('-', '/')
             time_str = date_raw[11:16]
-            date_short = f"{month_day} {time_str}"
-            date_only = month_day
+            date_short = f"{year}/{month_day} {time_str}" 
+            date_only = f"{year}/{month_day}" 
         else:
             date_short = "Unknown"
             date_only = "Unknown"
@@ -212,9 +206,10 @@ def home():
             'date': date_short
         })
 
-        if date_only not in daily_stats:
-            daily_stats[date_only] = 0
-        daily_stats[date_only] += total_p
+        if date_only != "Unknown":
+            if date_only not in daily_stats:
+                daily_stats[date_only] = 0
+            daily_stats[date_only] += total_p
 
     summary_data = {
         'count': total_trade_count, 
@@ -225,7 +220,6 @@ def home():
     sorted_items = sorted(item_stats.items(), key=lambda x: x[1]['count'], reverse=True)
     top_10 = [{'name': k, 'count': v['count']} for k, v in sorted_items[:10]]
 
-    # 💡 여기서 똑똑한 get_category 함수가 작동합니다
     categorized_items = {"차량": [], "스킨": [], "아이템": []}
     for name, stats in item_stats.items():
         cat = get_category(name)
@@ -239,13 +233,19 @@ def home():
     for cat in categorized_items:
         categorized_items[cat] = sorted(categorized_items[cat], key=lambda x: x['count'], reverse=True)
 
-    sorted_dates = sorted(daily_stats.keys())
-    chart_labels = sorted_dates[-7:]
-    chart_data = [daily_stats[d] for d in chart_labels]
+    sorted_dates = sorted(daily_stats.keys()) 
+    latest_dates = sorted_dates[-7:]
+    
+    # 만약 연도가 포함된 YYYY/MM/DD 포맷이면 차트에서는 연도를 뺍니다
+    chart_labels = []
+    for d in latest_dates:
+        if len(d) > 5: chart_labels.append(d[5:])
+        else: chart_labels.append(d)
+        
+    chart_data = [daily_stats[d] for d in latest_dates]
 
-    # 2. 뉴스 데이터 가져오기
     try:
-        news_response = supabase.table("mochi_news").select("*").order("created_at", desc=True).limit(10).execute()
+        news_response = supabase.table("mochi_news").select("*").order("created_at", desc=True).limit(100).execute()
         raw_news_data = news_response.data
     except Exception as e:
         print("뉴스 데이터 오류:", e)
@@ -263,7 +263,8 @@ def home():
             "title": news.get('title', '제목 없음'),
             "author": news.get('author', '익명 기자'),
             "date": clean_date,
-            "content": news.get('content', '')
+            "content": news.get('content', ''),
+            "image_url": news.get('image_url', '')
         })
 
     return render_template("index.html", 
