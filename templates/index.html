@@ -364,8 +364,12 @@ table td { border-bottom: 1px solid var(--border-main); }
                 <div class="cat-tabs">
                     <button class="cat-btn active" onclick="switchCat('차량', this)">🚗 차량</button>
                     <button class="cat-btn" onclick="switchCat('스킨', this)">👕 스킨</button>
+                    <button class="cat-btn" onclick="switchCat('의자', this)">🪑 의자</button>
                     <button class="cat-btn" onclick="switchCat('치장', this)">✨ 치장</button>
-                    <button class="cat-btn" onclick="switchCat('아이템', this)">📦 일반 아이템</button>
+                    <button class="cat-btn" onclick="switchCat('티켓', this)">🎟️ 티켓</button>
+                    <button class="cat-btn" onclick="switchCat('조각/재료', this)">🧩 조각/재료</button>
+                    <button class="cat-btn" onclick="switchCat('시즌 상품', this)">🎁 시즌 상품</button>
+                    <button class="cat-btn" onclick="switchCat('기타', this)">📦 기타</button>
                 </div>
                 <div id="category-container"></div>
             </div>
@@ -699,10 +703,20 @@ table td { border-bottom: 1px solid var(--border-main); }
         if(t > latestTime) latestTime = t; 
 
         let originalName = log.name;
-        let cat = log.category || '아이템';
-        let prefix = cat === '차량' ? '[🚗] ' : cat === '스킨' ? '[👕] ' : cat === '치장' ? '[✨] ' : '[📦] ';
+        let cat = log.category || '기타';
+        const categoryPrefixMap = {
+            '차량': '[🚗] ',
+            '스킨': '[👕] ',
+            '의자': '[🪑] ',
+            '치장': '[✨] ',
+            '티켓': '[🎟️] ',
+            '조각/재료': '[🧩] ',
+            '시즌 상품': '[🎁] ',
+            '기타': '[📦] '
+        };
+        let prefix = categoryPrefixMap[cat] || '[📦] ';
 
-        let cleanName = originalName.replace(/\[.*?\]/g, '').replace(/【.*?】/g, '').replace(/<.*?>/g, '').replace(/스킨박스#/g, '').replace(/차량박스#/g, '').replace(/[🚗👕🧸🪑✨📦🧩🎫🎣]/g, '').trim();
+        let cleanName = originalName.replace(/\[.*?\]/g, '').replace(/【.*?】/g, '').replace(/<.*?>/g, '').replace(/스킨박스#/g, '').replace(/차량박스#/g, '').replace(/치장박스#/g, '').replace(/의자박스#/g, '').replace(/아이템박스#/g, '').replace(/일반아이템박스#/g, '').replace(/시즌상품박스#/g, '').replace(/[🚗👕🧸🪑✨📦🧩🎫🎟🎁🎣]/g, '').trim();
         if (!cleanName) cleanName = originalName.replace(/\[.*?\]/g, '').trim() || originalName;
 
         return { ...log, original_name: originalName, name: prefix + cleanName, category: cat, timestamp: t };
@@ -768,18 +782,21 @@ table td { border-bottom: 1px solid var(--border-main); }
             stats[log.name].sum += log.unit_price;
         });
 
-        let cats = { '차량': [], '스킨': [], '치장': [], '아이템': [] };
+        const categoryOrder = ['차량', '스킨', '의자', '치장', '티켓', '조각/재료', '시즌 상품', '기타'];
+        let cats = {};
+        categoryOrder.forEach(c => cats[c] = []);
+
         for(let name in stats) {
             let avg = Math.floor(stats[name].sum / stats[name].count);
             let obj = { name: name, count: stats[name].count, avg_price: formatKRW(avg) };
             if(cats[stats[name].category]) cats[stats[name].category].push(obj);
-            else cats['아이템'].push(obj);
+            else cats['기타'].push(obj);
         }
 
-        for(let c in cats) cats[c].sort((a,b) => b.count - a.count);
+        categoryOrder.forEach(c => cats[c].sort((a,b) => b.count - a.count));
 
         let html = '';
-        for(let c in cats) {
+        categoryOrder.forEach(c => {
             html += `<div id="cat-${c}" class="cat-content ${c === '차량' ? 'active' : ''}">`;
             if(cats[c].length === 0) {
                 html += `<div style="padding:40px; text-align:center; color:var(--text-muted); grid-column: 1 / -1; font-weight:600;">해당 카테고리의 거래 내역이 없습니다.</div>`;
@@ -796,7 +813,7 @@ table td { border-bottom: 1px solid var(--border-main); }
                 });
             }
             html += `</div>`;
-        }
+        });
         container.innerHTML = html;
     }
 
@@ -805,7 +822,7 @@ table td { border-bottom: 1px solid var(--border-main); }
         switchPage('page-market', marketPageBtn);
         const searchBtn = document.querySelectorAll('.tab-btn')[1];
         switchTab('tab-search', searchBtn);
-        document.getElementById('searchInput').value = itemName.replace(/\[.*?\]\s*/g, ''); // 앞의 이모지 제거 후 검색
+        document.getElementById('searchInput').value = itemName.replace(/\[.*?\]\s*/g, ''); // 앞의 카테고리 이모지 제거 후 검색
         searchItem();
         document.getElementById('page-market').scrollIntoView({ behavior: 'smooth' });
     }

@@ -136,10 +136,36 @@ SKIN_NAMES = [
 
 CHIJANG_KEYWORDS = ["치장", "의자", "칭호", "날개", "테트리스", "가방", "마스크", "모자", "머리띠", "붕어", "하트", "영혼", "뼈다귀", "곰", "고양이", "마법진", "메이드", "가마솥", "유령", "스크림", "인형", "지팡이", "마법서", "달빛", "이펙트", "칫솔", "치약", "배게", "브로치", "백팩", "풍선", "서클", "슬리퍼", "귀", "뿔", "꼬리", "당고", "버블툴", "튜브", "선글라스", "아이스바", "반지", "갱", "효과", "불손", "스모그", "해트", "피카츄", "삼도류", "고기", "망토", "수리검", "구미", "파쿤", "주문서", "낫", "미니언즈", "꽃잎", "선풍기", "꽃관", "물총", "양동이", "복돼지", "외계토끼", "천사링", "캔디", "고질라", "이샤르", "양모펠트", "심즈", "왕관", "포켓몬", "TowerofPower", "CryoHops", "Butterfly", "Mainframe", "Wingedfury", "DemonHunter", "FuzzyBear", "Medusa", "Razor", "Street", "devil_wing", "rabbit_hat", "조명", "헤드셋", "책가방", "베이비베어", "드래곤", "애비츄", "사과", "츄", "신세계시즌1", "붕어시리즈", "오리시리즈", "판다시리즈", "아기시리즈", "개구리시리즈", "오리세트"]
 
-# 박스/상자는 차량박스, 스킨박스에도 들어가므로 제일 먼저 아이템 처리하면 오분류됩니다.
-# 그래서 명확한 아이템성 단어만 먼저 검사하고, 박스/상자는 마지막 fallback에서만 아이템 처리합니다.
-FORCE_ITEM_PRIORITY = ["뽑기권", "신청권", "교환권", "티켓", "조각", "부품", "포장키트", "이용권", "입장권", "분해권"]
-GENERIC_ITEM_WORDS = ["상자", "박스"]
+# 카테고리 분류 기준
+# 최종 화면 카테고리:
+# 차량 / 스킨 / 의자 / 치장 / 티켓 / 조각/재료 / 시즌 상품 / 기타
+
+CHAIR_KEYWORDS = [
+    "의자", "체어", "왕좌", "소파", "벤치", "스툴", "좌석", "쿠션의자", "게이밍체어"
+]
+
+# 사용자가 보기 쉽게 신청권/교환권/이용권/티켓류는 전부 "티켓" 탭으로 모읍니다.
+TICKET_KEYWORDS = [
+    "티켓", "신청권", "교환권", "이용권", "변경권", "입장권", "뽑기권", "분해권",
+    "등록권", "이름변경권", "닉네임변경권", "확장권", "이전권", "권"
+]
+
+MATERIAL_KEYWORDS = [
+    "조각", "재료", "부품", "파편", "결정", "원석", "광석", "광물", "가루", "코어",
+    "농축액", "씨앗", "약초", "원단", "철", "금속", "나무", "목재", "석재"
+]
+
+# 스킨/치장/차량 안에 들어있는 시즌명은 위에서 먼저 걸러지고,
+# 남은 일반 아이템 중 시즌성 이름만 "시즌 상품"으로 보냅니다.
+SEASON_PRODUCT_KEYWORDS = [
+    "시즌 상품", "시즌상품", "시즌", "상품", "상승 시즌", "상승시즌", "농협 시즌", "농협시즌",
+    "신세계 상품", "신세계상품", "한우팜", "잠수코인", "잠코", "모찌떡", "빙고",
+    "겨울이벤트", "할로윈", "빼빼로데이", "이벤트상품", "이벤트 상품"
+]
+
+# 박스/상자는 차량박스, 스킨박스, 치장박스에도 들어가므로 제일 먼저 기타 처리하면 오분류됩니다.
+# 그래서 차량/스킨/의자/치장/티켓/재료/시즌 검사가 끝난 뒤 마지막에만 기타로 보냅니다.
+GENERIC_ITEM_WORDS = ["상자", "박스", "돈", "현금", "포인트", "쿠폰"]
 
 # 원본 리스트에 누락되거나 이름 표기가 자주 흔들리는 차량 보험 키워드
 FALLBACK_VEHICLES = [
@@ -150,8 +176,9 @@ FALLBACK_VEHICLES = [
 ]
 
 MARKET_NOISE_WORDS = [
-    "차량박스", "스킨박스", "치장박스", "아이템박스", "일반아이템", "일반아이템박스",
-    "차량", "스킨", "치장", "상자", "박스"
+    "차량박스", "스킨박스", "치장박스", "의자박스", "아이템박스", "일반아이템박스", "일반아이템",
+    "시즌상품박스", "시즌 상품 박스", "차량", "스킨", "치장", "의자", "시즌상품", "시즌 상품",
+    "조각재료", "조각/재료", "상자", "박스"
 ]
 
 # 기호/띄어쓰기/대소문자를 통일해서 비교합니다.
@@ -182,7 +209,10 @@ def prepare_patterns(values):
 NORM_VEHICLES = prepare_patterns(VEHICLE_NAMES)
 NORM_SKINS = prepare_patterns(SKIN_NAMES)
 NORM_CHIJANG = prepare_patterns(CHIJANG_KEYWORDS)
-NORM_FORCE_ITEMS = prepare_patterns(FORCE_ITEM_PRIORITY)
+NORM_CHAIRS = prepare_patterns(CHAIR_KEYWORDS)
+NORM_TICKETS = prepare_patterns(TICKET_KEYWORDS)
+NORM_MATERIALS = prepare_patterns(MATERIAL_KEYWORDS)
+NORM_SEASON_PRODUCTS = prepare_patterns(SEASON_PRODUCT_KEYWORDS)
 NORM_GENERIC_ITEMS = prepare_patterns(GENERIC_ITEM_WORDS)
 NORM_FALLBACK = prepare_patterns(FALLBACK_VEHICLES)
 
@@ -203,38 +233,50 @@ def match_any(candidates, patterns, allow_reverse=True):
     return False
 
 
-# 카테고리 도출: 차량/스킨/치장을 먼저 잡고, 진짜 일반 아이템은 마지막에 보냅니다.
+# 카테고리 도출: 명확한 특수 카테고리를 먼저 잡고, 남은 것은 기타로 보냅니다.
 def get_category(item_name):
     candidates = make_candidates(item_name)
     norm_name = candidates[0]
 
-    # 1. 실제 차량명 우선: 차량박스/박스/상자 단어 때문에 일반 아이템으로 빠지는 문제 방지
+    # 1. 신청권/교환권/이용권/티켓류는 화면에서 "티켓"으로 표시
+    if match_any(candidates, NORM_TICKETS, allow_reverse=False):
+        return "티켓"
+
+    # 2. 실제 차량명 우선: 차량박스/박스/상자 단어 때문에 기타로 빠지는 문제 방지
     if match_any(candidates, NORM_VEHICLES) or match_any(candidates, NORM_FALLBACK, allow_reverse=False):
         return "차량"
 
-    # 2. 스킨/치장 리스트 우선
+    # 3. 의자는 치장에서 분리
+    if match_any(candidates, NORM_CHAIRS, allow_reverse=False):
+        return "의자"
+
+    # 4. 스킨/치장 리스트 우선
     if match_any(candidates, NORM_SKINS):
         if match_any(candidates, NORM_CHIJANG, allow_reverse=False):
             return "치장"
         return "스킨"
 
-    # 3. 치장 키워드가 직접 들어간 경우
+    # 5. 치장 키워드가 직접 들어간 경우
     if match_any(candidates, NORM_CHIJANG, allow_reverse=False):
         return "치장"
 
-    # 4. 스킨 키워드가 직접 들어간 경우
+    # 6. 스킨 키워드가 직접 들어간 경우
     if any(k in norm_name for k in ["스킨", "커스텀", "코스튬"]):
         return "스킨"
 
-    # 5. 명확한 소모품/권/티켓류는 일반 아이템
-    if match_any(candidates, NORM_FORCE_ITEMS, allow_reverse=False):
-        return "아이템"
+    # 7. 시즌성 일반 아이템
+    if match_any(candidates, NORM_SEASON_PRODUCTS, allow_reverse=False):
+        return "시즌 상품"
 
-    # 6. 박스/상자는 앞에서 차량/스킨/치장으로 못 잡힌 것만 일반 아이템
+    # 8. 조각/재료류
+    if match_any(candidates, NORM_MATERIALS, allow_reverse=False):
+        return "조각/재료"
+
+    # 9. 박스/상자/돈 등 남은 일반 아이템
     if match_any(candidates, NORM_GENERIC_ITEMS, allow_reverse=False):
-        return "아이템"
+        return "기타"
 
-    return "아이템"
+    return "기타"
 
 CACHE = {
     "market_data": None,
@@ -273,7 +315,7 @@ def home():
             date_short = "Unknown"
 
         item_name = row.get('item_name', '')
-        # 🌟 파이썬이 강철 엔진으로 100% 무결점 분류해서 프론트로 쏴줍니다!
+        # 파이썬에서 카테고리를 분류해서 프론트로 전달합니다.
         category = get_category(item_name)
 
         clean_logs.append({
@@ -284,7 +326,7 @@ def home():
             'seller': row.get('seller', '알 수 없음'),
             'buyer': row.get('buyer', '알 수 없음'),
             'date': date_short,
-            'category': category # HTML아, 넌 계산하지 말고 주는 대로 받아먹어라!
+            'category': category
         })
 
     real_news_list = []
