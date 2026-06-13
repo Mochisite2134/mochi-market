@@ -6,6 +6,7 @@
 <title>MOCHI MARKET & NEWS</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- 🌟 AI 누끼 라이브러리: 무조건 100% 로딩되는 전통 스크립트 방식으로 완전 교체 (에러 원천 차단) -->
 <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/bundle.js"></script>
 
 <script>
@@ -275,6 +276,7 @@ table td { border-bottom: 1px solid var(--border-main); }
     </aside>
 
     <main>
+        <!-- 1. 홈 화면 -->
         <div id="page-home" class="page-section active">
             <section class="hero">
                 <div id="heroSliderBg"></div>
@@ -320,6 +322,7 @@ table td { border-bottom: 1px solid var(--border-main); }
             </div>
         </div>
 
+        <!-- 2. 뉴스 매거진 -->
         <div id="page-news" class="page-section">
             <h2 style="margin-bottom:25px; font-size:26px; font-weight: 900; letter-spacing: -0.5px;">📰 모찌 매거진 최신 뉴스</h2>
             <div class="news-list">
@@ -345,6 +348,7 @@ table td { border-bottom: 1px solid var(--border-main); }
             </div>
         </div>
 
+        <!-- 3. 시세 조회 탭 -->
         <div id="page-market" class="page-section">
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('tab-list', this)">
@@ -415,6 +419,7 @@ table td { border-bottom: 1px solid var(--border-main); }
             </div>
         </div>
 
+        <!-- 4. 모찌 유틸리티 섹션 -->
         <div id="page-tools" class="page-section">
             <h2 style="margin-bottom:25px; font-size:26px; font-weight: 900; letter-spacing: -0.5px;">🛠️ 모찌 유틸리티 도구 모음</h2>
             <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
@@ -439,6 +444,7 @@ table td { border-bottom: 1px solid var(--border-main); }
     </main>
 </div>
 
+<!-- 모달 팝업 구조 완전 독립 -->
 <div id="newsModal" class="modal-overlay" onclick="closeNewsModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeNewsModal()">×</span>
@@ -503,7 +509,6 @@ table td { border-bottom: 1px solid var(--border-main); }
         filterMarketList();
     }
 
-    // 🌟 확실하게 동작하는 전통적인 AI 로딩 엔진
     async function processImageForRemoval(file) {
         if (!file) return;
         const spinner = document.getElementById('loadingRemover');
@@ -515,9 +520,9 @@ table td { border-bottom: 1px solid var(--border-main); }
             output.style.display = 'none';
             dlBtn.style.display = 'none';
 
-            // 모듈 대신 스크립트로 불러왔으므로 window 영역에 전역으로 세팅된 imglyRemoveBackground를 사용!
             if (typeof imglyRemoveBackground === 'undefined') {
-                alert('AI 엔진이 아직 서버에서 완전히 로드되지 않았습니다. 잠시만 기다려주세요.');
+                alert('AI 엔진이 아직 로드되지 않았습니다. 1~2초 뒤에 다시 시도해주세요.');
+                spinner.style.display = 'none';
                 return;
             }
 
@@ -670,8 +675,10 @@ table td { border-bottom: 1px solid var(--border-main); }
         } catch (error) { alert("오류가 발생했습니다: " + error); }
     }
 
+    // 🌟 안전하게 파이썬 데이터를 받아오는 로직
     const rawLogs = {{ logs_json | safe }};
     let latestTime = 0;
+
     const SIX_MONTHS = 180 * 24 * 60 * 60 * 1000;
     const FOURTEEN_DAYS = 14 * 24 * 60 * 60 * 1000;
 
