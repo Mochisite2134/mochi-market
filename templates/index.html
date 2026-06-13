@@ -6,8 +6,6 @@
 <title>MOCHI MARKET & NEWS</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/bundle.js"></script>
-
 <script>
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -508,25 +506,78 @@ table td { border-bottom: 1px solid var(--border-main); }
         filterMarketList();
     }
 
+    let bgRemovalEnginePromise = null;
+
+    function setRemoverStatus(message) {
+        const desc = document.querySelector('#dropZone .remover-desc');
+        if (desc) desc.innerHTML = message;
+    }
+
+    async function loadBackgroundRemovalEngine() {
+        // 예전 bundle 방식 / 새 ESM 방식 둘 다 대응
+        const globalCandidates = [
+            window.imglyRemoveBackground,
+            window.removeBackground,
+            window.backgroundRemoval && window.backgroundRemoval.removeBackground,
+            window.BackgroundRemoval && window.BackgroundRemoval.removeBackground
+        ];
+
+        for (const candidate of globalCandidates) {
+            if (typeof candidate === 'function') return candidate;
+            if (candidate && typeof candidate.default === 'function') return candidate.default;
+        }
+
+        if (!bgRemovalEnginePromise) {
+            bgRemovalEnginePromise = (async () => {
+                const moduleUrls = [
+                    'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm',
+                    'https://esm.sh/@imgly/background-removal@1.5.5'
+                ];
+
+                let lastError = null;
+                for (const url of moduleUrls) {
+                    try {
+                        const mod = await import(url);
+                        const fn = mod.default || mod.removeBackground || mod.imglyRemoveBackground;
+                        if (typeof fn === 'function') return fn;
+                    } catch (error) {
+                        lastError = error;
+                        console.warn('배경 제거 엔진 로드 실패:', url, error);
+                    }
+                }
+
+                throw lastError || new Error('누끼 제거 AI 엔진을 불러오지 못했습니다. 인터넷 연결 또는 CDN 차단 여부를 확인해주세요.');
+            })();
+        }
+
+        return bgRemovalEnginePromise;
+    }
+
     async function processImageForRemoval(file) {
         if (!file) return;
         const spinner = document.getElementById('loadingRemover');
         const output = document.getElementById('outputImage');
         const dlBtn = document.getElementById('downloadRemoverBtn');
+        const defaultStatus = '클립보드에 복사된 이미지를 <strong>Ctrl + V</strong>로 바로 붙여넣어도 작동합니다.';
 
         try {
             spinner.style.display = 'block';
             output.style.display = 'none';
             dlBtn.style.display = 'none';
+            setRemoverStatus('AI 엔진을 불러오는 중입니다. 첫 실행은 모델 파일 다운로드 때문에 시간이 조금 걸릴 수 있습니다.');
 
-            if (typeof imglyRemoveBackground === 'undefined') {
-                alert('AI 엔진이 아직 로드되지 않았습니다. 잠시만 기다려주세요.');
-                spinner.style.display = 'none';
-                return;
-            }
+            const removeBackground = await loadBackgroundRemovalEngine();
 
-            const config = { publicPath: "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/" };
-            const blob = await imglyRemoveBackground(file, config);
+            setRemoverStatus('이미지 배경을 제거하는 중입니다. 잠시만 기다려주세요.');
+            const blob = await removeBackground(file, {
+                output: { format: 'image/png', type: 'foreground' },
+                progress: (key, current, total) => {
+                    if (total) {
+                        const percent = Math.round((current / total) * 100);
+                        setRemoverStatus(`AI 모델 다운로드 중... ${percent}%`);
+                    }
+                }
+            });
             
             const url = URL.createObjectURL(blob);
             output.src = url;
@@ -534,9 +585,11 @@ table td { border-bottom: 1px solid var(--border-main); }
             dlBtn.href = url;
             dlBtn.download = `mochi_remover_${Date.now()}.png`;
             dlBtn.style.display = 'inline-block';
+            setRemoverStatus('완료되었습니다. 아래 버튼으로 이미지를 다운로드하세요.');
         } catch (error) {
             console.error(error);
-            alert('AI 누끼 제거 중 에러 발생: ' + error.message);
+            setRemoverStatus(defaultStatus);
+            alert('AI 누끼 제거 중 에러 발생: ' + (error && error.message ? error.message : error));
         } finally {
             spinner.style.display = 'none';
         }

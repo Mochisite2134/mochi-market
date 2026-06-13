@@ -134,7 +134,18 @@ SKIN_NAMES = [
     "[개구리시리즈] 귀여운 개구리 어깨 오른쪽", "[개구리시리즈] 귀여운 개구리 막대", "귀여운 오리 세트"
 ]
 
-CHIJANG_KEYWORDS = ["치장", "의자", "칭호", "날개", "테트리스", "가방", "마스크", "모자", "머리띠", "붕어", "하트", "영혼", "뼈다귀", "곰", "고양이", "마법진", "메이드", "가마솥", "유령", "스크림", "인형", "지팡이", "마법서", "달빛", "이펙트", "칫솔", "치약", "배게", "브로치", "백팩", "풍선", "서클", "슬리퍼", "귀", "뿔", "꼬리", "당고", "버블툴", "튜브", "선글라스", "아이스바", "반지", "갱", "효과", "불손", "스모그", "해트", "피카츄", "삼도류", "고기", "망토", "수리검", "구미", "파쿤", "주문서", "낫", "미니언즈", "꽃잎", "선풍기", "꽃관", "물총", "양동이", "복돼지", "외계토끼", "천사링", "캔디", "고질라", "이샤르", "양모펠트", "심즈", "왕관", "포켓몬", "TowerofPower", "CryoHops", "Butterfly", "Mainframe", "Wingedfury", "DemonHunter", "FuzzyBear", "Medusa", "Razor", "Street", "devil_wing", "rabbit_hat", "조명", "헤드셋", "책가방", "베이비베어", "드래곤", "애비츄", "사과", "츄", "신세계시즌1", "붕어시리즈", "오리시리즈", "판다시리즈", "아기시리즈", "개구리시리즈", "오리세트"]
+# 치장 키워드
+# 주의: "칭호"는 치장이 아니라 기타로 분류합니다.
+CHIJANG_KEYWORDS = [
+    "치장", "날개", "테트리스", "가방", "마스크", "모자", "머리띠", "하트", "영혼", "뼈다귀",
+    "마법진", "가마솥", "유령", "스크림", "인형", "지팡이", "마법서", "달빛", "이펙트",
+    "칫솔", "치약", "배게", "베개", "브로치", "백팩", "풍선", "서클", "슬리퍼", "귀", "뿔",
+    "꼬리", "당고", "버블툴", "튜브", "선글라스", "아이스바", "반지", "효과", "불손", "스모그",
+    "해트", "피카츄", "삼도류", "망토", "수리검", "파쿤", "주문서", "낫", "미니언즈", "꽃잎",
+    "선풍기", "꽃관", "물총", "양동이", "천사링", "캔디", "고질라", "양모펠트", "왕관",
+    "devil_wing", "rabbit_hat", "조명", "헤드셋", "책가방", "베이비베어", "드래곤", "애비츄",
+    "어깨", "슬링백", "헤드폰", "슈즈", "꼬물이", "요정날개", "천사 날개", "요정왕관"
+]
 
 # 카테고리 분류 기준
 # 최종 화면 카테고리:
@@ -144,58 +155,64 @@ CHAIR_KEYWORDS = [
     "의자", "체어", "왕좌", "소파", "벤치", "스툴", "좌석", "쿠션의자", "게이밍체어"
 ]
 
-# 사용자가 보기 쉽게 신청권/교환권/이용권/티켓류는 전부 "티켓" 탭으로 모읍니다.
+# 신청권/교환권/이용권/티켓류는 전부 "티켓" 탭으로 모읍니다.
 TICKET_KEYWORDS = [
-    "티켓", "신청권", "교환권", "이용권", "변경권", "입장권", "뽑기권", "분해권",
-    "등록권", "이름변경권", "닉네임변경권", "확장권", "이전권", "권"
+    "티켓", "신청권", "교환권", "이용권", "변경권", "입장권", "뽑기권", "분해권", "등록권",
+    "이름변경권", "닉네임변경권", "확장권", "이전권", "추가권", "초대권", "쿠폰", "ticket", "pass"
 ]
 
+# 조각/재료는 차량명이나 시즌명이 섞여도 조각/재료가 먼저입니다.
+# 예: "레고카 조각", "신세계 상품 조각" → 조각/재료
 MATERIAL_KEYWORDS = [
     "조각", "재료", "부품", "파편", "결정", "원석", "광석", "광물", "가루", "코어",
-    "농축액", "씨앗", "약초", "원단", "철", "금속", "나무", "목재", "석재"
+    "농축액", "씨앗", "약초", "원단", "철", "금속", "나무", "목재", "석재", "가죽", "원료"
 ]
 
-# 스킨/치장/차량 안에 들어있는 시즌명은 위에서 먼저 걸러지고,
-# 남은 일반 아이템 중 시즌성 이름만 "시즌 상품"으로 보냅니다.
+# 스킨/치장/차량 안의 시즌명은 먼저 해당 카테고리에서 잡고,
+# 남은 일반 아이템 중 시즌성 상품만 "시즌 상품"으로 보냅니다.
 SEASON_PRODUCT_KEYWORDS = [
-    "시즌 상품", "시즌상품", "시즌", "상품", "상승 시즌", "상승시즌", "농협 시즌", "농협시즌",
+    "시즌 상품", "시즌상품", "상승 시즌", "상승시즌", "농협 시즌", "농협시즌",
     "신세계 상품", "신세계상품", "한우팜", "잠수코인", "잠코", "모찌떡", "빙고",
-    "겨울이벤트", "할로윈", "빼빼로데이", "이벤트상품", "이벤트 상품"
+    "겨울이벤트", "할로윈", "빼빼로데이", "이벤트상품", "이벤트 상품", "시즌"
 ]
 
-# 박스/상자는 차량박스, 스킨박스, 치장박스에도 들어가므로 제일 먼저 기타 처리하면 오분류됩니다.
-# 그래서 차량/스킨/의자/치장/티켓/재료/시즌 검사가 끝난 뒤 마지막에만 기타로 보냅니다.
-GENERIC_ITEM_WORDS = ["상자", "박스", "돈", "현금", "포인트", "쿠폰"]
+# 남은 일반 아이템 처리용입니다. 박스/상자는 차량박스/스킨박스에도 들어가므로 마지막에만 봅니다.
+GENERIC_ITEM_WORDS = ["상자", "박스", "돈", "현금", "포인트", "랜덤박스", "랜덤상자"]
 
-# 원본 리스트에 누락되거나 이름 표기가 자주 흔들리는 차량 보험 키워드
+# 원본 차량 리스트에 없거나 표기가 줄어서 들어오는 차량명 보정
 FALLBACK_VEHICLES = [
-    "차량박스", "개인차량", "개인보트", "미니카", "MINI CAR", "오토바이", "스쿠터", "보트",
-    "벤조", "f80", "보네노", "MINI", "그랜절", "웰시코기", "웨시코기", "닌자커스텀",
-    "환다", "피에로", "EP9", "비엠", "포코", "마카시", "솔라리", "솔라리 비전",
-    "스트라이크", "스트라이크 비전", "볼레드", "아폴로", "데르조", "양카", "차량"
+    "차량박스", "개인차량", "개인보트", "미니카", "mini car", "minicar", "오토바이", "오도방구",
+    "스쿠터", "보트", "비전", "벤조", "f80", "보네노", "그랜절", "웰시코기", "웨시코기",
+    "닌자커스텀", "환다", "피에로", "ep9", "비엠", "포코", "마카시", "솔라리", "솔라리 비전",
+    "스트라이크", "스트라이크 비전", "볼레드", "아폴로", "데르조", "x80데빌헌터", "레고카"
 ]
 
-MARKET_NOISE_WORDS = [
-    "차량박스", "스킨박스", "치장박스", "의자박스", "아이템박스", "일반아이템박스", "일반아이템",
-    "시즌상품박스", "시즌 상품 박스", "차량", "스킨", "치장", "의자", "시즌상품", "시즌 상품",
-    "조각재료", "조각/재료", "상자", "박스"
+# 마켓명에서 앞에 붙는 껍데기 단어만 제거합니다.
+# "스킨"이나 "차량"을 무작정 제거하면 "페링님 개인스킨"이 "페링님 개인"으로 바뀌어서
+# "페링님 개인차량"과 헷갈리는 문제가 생기므로 제거하지 않습니다.
+BOX_NOISE_WORDS = [
+    "차량박스", "스킨박스", "치장박스", "의자박스", "아이템박스", "일반아이템박스",
+    "시즌상품박스", "시즌 상품 박스", "상자", "박스"
 ]
+
+# 치장으로 오해하면 안 되는 단어들
+NOT_CHIJANG_KEYWORDS = ["칭호"]
 
 # 기호/띄어쓰기/대소문자를 통일해서 비교합니다.
 def normalize(text):
     return re.sub(r'[^가-힣a-zA-Z0-9]', '', str(text)).lower()
 
 
-def strip_market_noise(norm_text):
+def strip_box_noise(norm_text):
     cleaned = norm_text
-    for word in sorted([normalize(w) for w in MARKET_NOISE_WORDS], key=len, reverse=True):
+    for word in sorted([normalize(w) for w in BOX_NOISE_WORDS], key=len, reverse=True):
         cleaned = cleaned.replace(word, '')
     return cleaned
 
 
 def make_candidates(item_name):
     norm_name = normalize(item_name)
-    stripped = strip_market_noise(norm_name)
+    stripped = strip_box_noise(norm_name)
     candidates = [norm_name]
     if stripped and stripped != norm_name:
         candidates.append(stripped)
@@ -206,74 +223,148 @@ def prepare_patterns(values):
     return sorted({normalize(v) for v in values if normalize(v)}, key=len, reverse=True)
 
 
-NORM_VEHICLES = prepare_patterns(VEHICLE_NAMES)
-NORM_SKINS = prepare_patterns(SKIN_NAMES)
+def make_vehicle_aliases(values):
+    aliases = set()
+    for v in values:
+        n = normalize(v)
+        if not n:
+            continue
+        aliases.add(n)
+        # LED 표기가 빠진 차량명 보정: X80데빌헌터 LED → X80데빌헌터
+        if n.endswith('led') and len(n) > 6:
+            aliases.add(n[:-3])
+    aliases.update(prepare_patterns(FALLBACK_VEHICLES))
+    return sorted(aliases, key=len, reverse=True)
+
+
+NORM_VEHICLES = make_vehicle_aliases(VEHICLE_NAMES)
+NORM_VEHICLE_SET = set(NORM_VEHICLES)
+
+# 차량으로 볼 수 있는 명확한 표현입니다.
+# 단순 차량명 부분 문자열만으로 차량 처리하면 "블레이저" 안의 "레이저" 같은 오분류가 생기므로,
+# 차량 판정은 기본적으로 정확히 일치하거나 아래 표현이 함께 있을 때만 강하게 적용합니다.
+EXPLICIT_VEHICLE_KEYWORDS = [
+    "차량", "개인차량", "차량박스", "개인보트", "미니카", "mini car", "minicar",
+    "오토바이", "오도방구", "스쿠터", "보트", "카트", "범퍼카", "휠체어",
+    "트랙터", "지프차", "택시", "전기차", "장난감차"
+]
+
+# 일반 박스/상자는 먼저 기타로 보내야 합니다.
+# 단, 차량박스/스킨박스/치장박스/의자박스처럼 카테고리 박스인 경우는 제외합니다.
+CATEGORY_BOX_WORDS = [
+    "차량박스", "스킨박스", "치장박스", "의자박스", "시즌상품박스", "시즌 상품 박스"
+]
+
+# 원본 SKIN_NAMES 뒤쪽에는 백팩/날개/마스크 같은 치장 아이템도 섞여 있습니다.
+# '무지개 깃발'부터는 치장 목록으로 보고, 그 앞쪽만 실제 스킨명 매칭에 사용합니다.
+try:
+    TRUE_SKIN_NAMES = SKIN_NAMES[:SKIN_NAMES.index('무지개 깃발')]
+except ValueError:
+    TRUE_SKIN_NAMES = SKIN_NAMES
+NORM_SKINS = prepare_patterns(TRUE_SKIN_NAMES)
 NORM_CHIJANG = prepare_patterns(CHIJANG_KEYWORDS)
 NORM_CHAIRS = prepare_patterns(CHAIR_KEYWORDS)
 NORM_TICKETS = prepare_patterns(TICKET_KEYWORDS)
 NORM_MATERIALS = prepare_patterns(MATERIAL_KEYWORDS)
 NORM_SEASON_PRODUCTS = prepare_patterns(SEASON_PRODUCT_KEYWORDS)
 NORM_GENERIC_ITEMS = prepare_patterns(GENERIC_ITEM_WORDS)
-NORM_FALLBACK = prepare_patterns(FALLBACK_VEHICLES)
+NORM_NOT_CHIJANG = prepare_patterns(NOT_CHIJANG_KEYWORDS)
+NORM_EXPLICIT_VEHICLE = prepare_patterns(EXPLICIT_VEHICLE_KEYWORDS)
+NORM_CATEGORY_BOX_WORDS = prepare_patterns(CATEGORY_BOX_WORDS)
 
 
-def match_any(candidates, patterns, allow_reverse=True):
+# 아이템명이 박스/상자류인데 카테고리 박스가 아니면 기타로 보냅니다.
+# 예: "스위치블레이저 몸체 상자"는 "레이저"라는 차량명이 안에 들어 있어도 차량이 아닙니다.
+def is_plain_box_item(norm_text):
+    has_box = any(word in norm_text for word in ["박스", "상자", "랜덤박스", "랜덤상자"])
+    has_category_box = any(word in norm_text for word in NORM_CATEGORY_BOX_WORDS)
+    return has_box and not has_category_box
+
+
+def contains_any(candidates, patterns):
     for candidate in candidates:
         if not candidate:
             continue
         for pattern in patterns:
-            if not pattern:
-                continue
-            # 보통은 "차량박스솔라리비전" 안에 "솔라리비전"이 들어있는 형태입니다.
-            if pattern in candidate:
-                return True
-            # DB에 "볼레드"처럼 짧게 들어오고 리스트에는 더 긴 표기가 있을 때를 보정합니다.
-            if allow_reverse and len(candidate) >= 3 and candidate in pattern:
+            if pattern and pattern in candidate:
                 return True
     return False
 
 
-# 카테고리 도출: 명확한 특수 카테고리를 먼저 잡고, 남은 것은 기타로 보냅니다.
+def contains_word(norm_text, words):
+    return any(normalize(w) in norm_text for w in words)
+
+
+def is_exact_known_vehicle(candidates):
+    return any(candidate in NORM_VEHICLE_SET for candidate in candidates if candidate)
+
+
+def is_vehicle_item(candidates, norm_name):
+    # 1) 차량명 자체가 정확히 일치하는 경우
+    #    예: 솔라리비전, 스트라이크비전, 볼레드, x80데빌헌터
+    if is_exact_known_vehicle(candidates):
+        return True
+
+    # 2) 차량박스/개인차량/미니카/오토바이/보트처럼 차량임이 명확한 단어가 있는 경우
+    if contains_any([norm_name], NORM_EXPLICIT_VEHICLE):
+        return True
+
+    return False
+
+
+# 카테고리 도출 우선순위
+# 1) 티켓/조각/재료처럼 이름 자체가 기능인 것
+# 2) 스킨/의자처럼 명확한 카테고리
+# 3) 일반 박스/상자/칭호 등 기타로 빠져야 하는 예외
+# 4) 차량은 정확히 일치하거나 차량 표현이 명확할 때만 적용
+# 5) 치장/시즌상품
+# 6) 나머지 기타
+# 이 순서가 중요합니다. 특히 "블레이저" 안의 "레이저"처럼 부분 문자열이 겹쳐도 차량으로 보내면 안 됩니다.
 def get_category(item_name):
     candidates = make_candidates(item_name)
     norm_name = candidates[0]
 
-    # 1. 신청권/교환권/이용권/티켓류는 화면에서 "티켓"으로 표시
-    if match_any(candidates, NORM_TICKETS, allow_reverse=False):
+    # 1. 신청권/교환권/이용권/티켓류
+    if contains_any(candidates, NORM_TICKETS):
         return "티켓"
 
-    # 2. 실제 차량명 우선: 차량박스/박스/상자 단어 때문에 기타로 빠지는 문제 방지
-    if match_any(candidates, NORM_VEHICLES) or match_any(candidates, NORM_FALLBACK, allow_reverse=False):
-        return "차량"
-
-    # 3. 의자는 치장에서 분리
-    if match_any(candidates, NORM_CHAIRS, allow_reverse=False):
-        return "의자"
-
-    # 4. 스킨/치장 리스트 우선
-    if match_any(candidates, NORM_SKINS):
-        if match_any(candidates, NORM_CHIJANG, allow_reverse=False):
-            return "치장"
-        return "스킨"
-
-    # 5. 치장 키워드가 직접 들어간 경우
-    if match_any(candidates, NORM_CHIJANG, allow_reverse=False):
-        return "치장"
-
-    # 6. 스킨 키워드가 직접 들어간 경우
-    if any(k in norm_name for k in ["스킨", "커스텀", "코스튬"]):
-        return "스킨"
-
-    # 7. 시즌성 일반 아이템
-    if match_any(candidates, NORM_SEASON_PRODUCTS, allow_reverse=False):
-        return "시즌 상품"
-
-    # 8. 조각/재료류
-    if match_any(candidates, NORM_MATERIALS, allow_reverse=False):
+    # 2. 조각/재료류: 차량명/시즌명이 같이 있어도 재료가 우선
+    if contains_any(candidates, NORM_MATERIALS):
         return "조각/재료"
 
-    # 9. 박스/상자/돈 등 남은 일반 아이템
-    if match_any(candidates, NORM_GENERIC_ITEMS, allow_reverse=False):
+    # 3. 스킨: 개인스킨/운영팀스킨/스킨박스는 차량명 후보와 겹쳐도 스킨이 우선
+    if contains_word(norm_name, ["개인스킨", "운영팀스킨", "후원스킨", "스킨박스", "스킨"]):
+        return "스킨"
+    if contains_any(candidates, NORM_SKINS):
+        return "스킨"
+
+    # 4. 의자는 치장에서 분리
+    if contains_any(candidates, NORM_CHAIRS):
+        return "의자"
+
+    # 5. 칭호는 치장/차량/스킨으로 보내지 않고 기타로 둡니다.
+    if contains_any(candidates, NORM_NOT_CHIJANG):
+        return "기타"
+
+    # 6. 일반 박스/상자는 내부 단어가 차량명과 겹쳐도 기타로 보냅니다.
+    #    예: 스위치블레이저 몸체 상자 → 기타
+    if is_plain_box_item(norm_name):
+        return "기타"
+
+    # 7. 차량: 부분 문자열 매칭 금지. 정확히 일치하거나 차량 표현이 명확할 때만 차량.
+    if is_vehicle_item(candidates, norm_name):
+        return "차량"
+
+    # 8. 치장
+    if contains_any(candidates, NORM_CHIJANG):
+        return "치장"
+
+    # 9. 시즌성 일반 상품
+    if contains_any(candidates, NORM_SEASON_PRODUCTS):
+        return "시즌 상품"
+
+    # 10. 남은 박스/상자/돈 등
+    if contains_any(candidates, NORM_GENERIC_ITEMS):
         return "기타"
 
     return "기타"
