@@ -6,7 +6,6 @@
 <title>MOCHI MARKET & NEWS</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-<!-- 🌟 AI 누끼 라이브러리: 무조건 100% 로딩되는 전통 스크립트 방식으로 완전 교체 (에러 원천 차단) -->
 <script src="https://unpkg.com/@imgly/background-removal@1.4.3/dist/bundle.js"></script>
 
 <script>
@@ -59,8 +58,8 @@
     --rank-bg: #334155;
 }
 
-*{margin:0;padding:0;box-sizing:border-box;}
-input, textarea { -webkit-user-select: auto; user-select: auto; }
+*{margin:0;padding:0;box-sizing:border-box; -webkit-user-select: none; user-select: none; -webkit-user-drag: none;}
+input, textarea { -webkit-user-select: auto; user-select: auto; -webkit-user-drag: auto; }
 
 body { 
     font-family:'Pretendard',sans-serif; 
@@ -164,7 +163,7 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(15px); 
 .search-container { display:flex; gap:12px; margin-bottom:25px; }
 .search-input { width: 100%; padding:18px; border:2px solid var(--border-main); border-radius:14px; font-size:16px; outline:none; background: var(--bg-input); color: var(--text-main); }
 .search-input:focus { border-color: var(--pink-main); }
-.search-btn { padding:0 35px; background:var(--pink-main); color:white; border:none; border-radius:14px; font-size:17px; font-weight:800; cursor:pointer; box-shadow: 0 5px 15px var(--pink-light); }
+.search-btn { padding:0 35px; background:var(--pink-main); color:white; border:none; border-radius:14px; font-size:17px; font-weight:800; cursor:pointer; box-shadow: 0 5px 15px var(--pink-light); min-width: 120px; }
 .search-btn:hover { transform: translateY(-2px); }
 
 .period-filter-area { display:none; width: 100%; gap: 10px; margin-bottom: 25px; }
@@ -276,7 +275,6 @@ table td { border-bottom: 1px solid var(--border-main); }
     </aside>
 
     <main>
-        <!-- 1. 홈 화면 -->
         <div id="page-home" class="page-section active">
             <section class="hero">
                 <div id="heroSliderBg"></div>
@@ -322,7 +320,6 @@ table td { border-bottom: 1px solid var(--border-main); }
             </div>
         </div>
 
-        <!-- 2. 뉴스 매거진 -->
         <div id="page-news" class="page-section">
             <h2 style="margin-bottom:25px; font-size:26px; font-weight: 900; letter-spacing: -0.5px;">📰 모찌 매거진 최신 뉴스</h2>
             <div class="news-list">
@@ -348,7 +345,6 @@ table td { border-bottom: 1px solid var(--border-main); }
             </div>
         </div>
 
-        <!-- 3. 시세 조회 탭 -->
         <div id="page-market" class="page-section">
             <div class="tabs">
                 <button class="tab-btn active" onclick="switchTab('tab-list', this)">
@@ -382,6 +378,7 @@ table td { border-bottom: 1px solid var(--border-main); }
                 </div>
                 
                 <div id="periodFilterArea" class="period-filter-area">
+                    <button class="cat-btn" id="btn-period-all" onclick="changePeriod(9999, this)">📅 전체 기간</button>
                     <button class="cat-btn" id="btn-period-day" onclick="changePeriod(1, this)">📅 일간 (1일)</button>
                     <button class="cat-btn active" id="btn-period-week" onclick="changePeriod(7, this)">📅 주간 (7일)</button>
                     <button class="cat-btn" id="btn-period-month" onclick="changePeriod(30, this)">📅 월간 (30일)</button>
@@ -419,7 +416,6 @@ table td { border-bottom: 1px solid var(--border-main); }
             </div>
         </div>
 
-        <!-- 4. 모찌 유틸리티 섹션 -->
         <div id="page-tools" class="page-section">
             <h2 style="margin-bottom:25px; font-size:26px; font-weight: 900; letter-spacing: -0.5px;">🛠️ 모찌 유틸리티 도구 모음</h2>
             <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
@@ -444,7 +440,6 @@ table td { border-bottom: 1px solid var(--border-main); }
     </main>
 </div>
 
-<!-- 모달 팝업 구조 완전 독립 -->
 <div id="newsModal" class="modal-overlay" onclick="closeNewsModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeNewsModal()">×</span>
@@ -521,12 +516,14 @@ table td { border-bottom: 1px solid var(--border-main); }
             dlBtn.style.display = 'none';
 
             if (typeof imglyRemoveBackground === 'undefined') {
-                alert('AI 엔진이 아직 로드되지 않았습니다. 1~2초 뒤에 다시 시도해주세요.');
+                alert('AI 엔진이 아직 로드되지 않았습니다. 잠시만 기다려주세요.');
                 spinner.style.display = 'none';
                 return;
             }
 
-            const blob = await imglyRemoveBackground(file);
+            const config = { publicPath: "https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.3/dist/" };
+            const blob = await imglyRemoveBackground(file, config);
+            
             const url = URL.createObjectURL(blob);
             output.src = url;
             output.style.display = 'block';
@@ -675,10 +672,9 @@ table td { border-bottom: 1px solid var(--border-main); }
         } catch (error) { alert("오류가 발생했습니다: " + error); }
     }
 
-    // 🌟 안전하게 파이썬 데이터를 받아오는 로직
+    // 🌟 파이썬 데이터 매핑: 파이썬이 던져준 카테고리를 100% 무조건 신뢰하고 적용합니다!
     const rawLogs = {{ logs_json | safe }};
     let latestTime = 0;
-
     const SIX_MONTHS = 180 * 24 * 60 * 60 * 1000;
     const FOURTEEN_DAYS = 14 * 24 * 60 * 60 * 1000;
 
@@ -703,7 +699,6 @@ table td { border-bottom: 1px solid var(--border-main); }
         if(t > latestTime) latestTime = t; 
 
         let originalName = log.name;
-        // 🌟 파이썬에서 넘겨준 정확한 카테고리를 그대로 적용!
         let cat = log.category || '아이템';
         let prefix = cat === '차량' ? '[🚗] ' : cat === '스킨' ? '[👕] ' : cat === '치장' ? '[✨] ' : '[📦] ';
 
@@ -810,7 +805,7 @@ table td { border-bottom: 1px solid var(--border-main); }
         switchPage('page-market', marketPageBtn);
         const searchBtn = document.querySelectorAll('.tab-btn')[1];
         switchTab('tab-search', searchBtn);
-        document.getElementById('searchInput').value = itemName;
+        document.getElementById('searchInput').value = itemName.replace(/\[.*?\]\s*/g, ''); // 앞의 이모지 제거 후 검색
         searchItem();
         document.getElementById('page-market').scrollIntoView({ behavior: 'smooth' });
     }
@@ -820,14 +815,14 @@ table td { border-bottom: 1px solid var(--border-main); }
     let currentPeriodDays = 7;    
 
     function searchItem() {
-        const keyword = document.getElementById('searchInput').value.trim();
+        const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
         const tbody = document.getElementById('searchResultBody');
         const filterArea = document.getElementById('periodFilterArea');
         const chartArea = document.getElementById('searchChartArea');
         
         if (!keyword) return;
 
-        currentFilteredLogs = allLogs.filter(log => log.name.includes(keyword) || (log.original_name && log.original_name.includes(keyword)))
+        currentFilteredLogs = allLogs.filter(log => log.name.toLowerCase().includes(keyword) || log.original_name.toLowerCase().includes(keyword))
                                      .sort((a, b) => a.timestamp - b.timestamp);
 
         if (currentFilteredLogs.length === 0) {
@@ -837,11 +832,35 @@ table td { border-bottom: 1px solid var(--border-main); }
             return;
         }
 
-        let html = '';
-        [...currentFilteredLogs].reverse().forEach(log => {
-            let displayDate = log.date;
-            if (displayDate.length > 10) displayDate = displayDate.substring(5);
+        filterArea.style.display = "flex";
+        
+        document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
+        document.getElementById('btn-period-week').classList.add('active');
+        changePeriod(7, document.getElementById('btn-period-week'));
+    }
 
+    function changePeriod(days, btnElement) {
+        document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
+        if(btnElement) btnElement.classList.add('active');
+        currentPeriodDays = days;
+        
+        const limitTime = currentPeriodDays * 24 * 60 * 60 * 1000; 
+        let periodLogs = currentFilteredLogs.filter(log => (latestTime - log.timestamp) <= limitTime);
+        
+        renderSearchTable(periodLogs); 
+        renderSearchChart(periodLogs); 
+    }
+
+    function renderSearchTable(logs) {
+        const tbody = document.getElementById('searchResultBody');
+        if (logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:40px; text-align:center; color:var(--text-muted); font-size: 15px; font-weight: 600;">선택하신 기간 내에는 거래 내역이 없습니다.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        [...logs].reverse().forEach(log => {
+            let displayDate = log.date.length > 10 ? log.date.substring(5) : log.date;
             html += `
                 <tr style="border-bottom:1px solid var(--border-main); transition:0.2s;" onmouseover="this.style.backgroundColor='var(--bg-hover-table)'" onmouseout="this.style.backgroundColor='transparent'">
                     <td style="color:var(--text-muted); font-size:13.5px; font-weight:600;">${displayDate}</td>
@@ -855,39 +874,18 @@ table td { border-bottom: 1px solid var(--border-main); }
             `;
         });
         tbody.innerHTML = html;
-        filterArea.style.display = "flex";
-        document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('btn-period-week').classList.add('active');
-        currentPeriodDays = 7;
-        updateChart();
     }
 
-    function changePeriod(days, btnElement) {
-        document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
-        btnElement.classList.add('active');
-        currentPeriodDays = days;
-        updateChart();
-    }
-
-    function updateChart() {
+    function renderSearchChart(logs) {
         const chartArea = document.getElementById('searchChartArea');
-        if (currentFilteredLogs.length === 0) return;
-
-        const limitTime = currentPeriodDays * 24 * 60 * 60 * 1000; 
-        const latestSearchTime = currentFilteredLogs[currentFilteredLogs.length - 1].timestamp;
-        let periodLogs = currentFilteredLogs.filter(log => (latestSearchTime - log.timestamp) <= limitTime);
-
-        if (periodLogs.length === 0) { chartArea.style.display = "none"; return; }
+        if (logs.length === 0) { chartArea.style.display = "none"; return; }
 
         let groupedData = {};
-        periodLogs.forEach(log => {
+        logs.forEach(log => {
             let key = log.date;
             try {
                 let parts = log.date.split(' ');
-                let datePart = parts[0];
-                if (datePart.split('/').length === 3) {
-                    datePart = datePart.split('/').slice(1).join('/'); 
-                }
+                let datePart = parts[0].split('/').length === 3 ? parts[0].split('/').slice(1).join('/') : parts[0];
                 let hourPart = parseInt(parts[1].split(':')[0]);
                 let groupHour = Math.floor(hourPart / 4) * 4;
                 key = `${datePart} ${String(groupHour).padStart(2, '0')}:00`;
@@ -908,12 +906,14 @@ table td { border-bottom: 1px solid var(--border-main); }
         const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
         const tickColor = isDark ? '#94a3b8' : '#a4b0be';
 
+        let periodLabel = currentPeriodDays === 1 ? '일간' : currentPeriodDays === 7 ? '주간' : currentPeriodDays === 30 ? '월간' : '전체 기간';
+
         searchChartInstance = new Chart(ctx, {
             type: 'line',
             data: {
                 labels: chartLabels,
                 datasets: [{
-                    label: `${currentPeriodDays == 1 ? '일간' : currentPeriodDays == 7 ? '주간' : '월간'} 평균 단가 흐름`,
+                    label: `${periodLabel} 평균 단가 흐름`,
                     data: chartPrices,
                     borderColor: '#ff6ba6',
                     backgroundColor: 'rgba(255, 107, 166, 0.15)',
