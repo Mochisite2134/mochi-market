@@ -6,6 +6,7 @@
 <title>MOCHI MARKET & NEWS</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- 🌟 깜빡임 방지: 페이지 로딩 전 다크모드 설정 불러오기 -->
 <script>
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -213,6 +214,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 .footer-col ul li a:hover { color: var(--pink-main); }
 .footer-bottom { max-width: 1400px; margin: 0 auto; border-top: 1px solid var(--border-main); padding-top: 25px; text-align: center; color: var(--text-muted); font-size: 13.5px; font-weight: 500; transition: border-color 0.3s, color 0.3s; }
 
+
 /* =======================================================
    📱 모바일 완벽 최적화
 ======================================================== */
@@ -271,6 +273,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 <header>
     <div class="logo">🐱 모찌 소식</div>
+    <!-- 다크 모드 토글 -->
     <button id="darkModeToggle" class="theme-btn" onclick="toggleDarkMode()" title="다크 모드 전환">🌙</button>
     
     <nav class="top-nav">
@@ -282,6 +285,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 <div class="layout">
     <aside class="sidebar">
+        <!-- 누적 거래 현황 -->
         <div class="side-box">
             <div class="side-title">누적 거래 현황 <span class="badge">최근 7일</span></div>
             <div class="summary-item"><span>총 거래 건수</span><strong id="summary-count">- 건</strong></div>
@@ -289,6 +293,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
             <div class="summary-item"><span>평균 거래 단가</span><strong id="summary-avg">- 원</strong></div>
         </div>
 
+        <!-- 인기 거래 TOP 10 -->
         <div class="side-box">
             <div class="side-title">🔥 인기 거래 TOP 10 <span class="badge-blue">최근 2주</span></div>
             <ul class="rank-list" id="sidebar-rank-list"></ul>
@@ -298,6 +303,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     <main>
         <div id="page-home" class="page-section active">
             
+            <!-- 슬라이드쇼 히어로 배너 -->
             <section class="hero">
                 <div id="heroSliderBg"></div>
                 <div class="hero-overlay"></div>
@@ -408,6 +414,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
                     <canvas id="searchChart"></canvas>
                 </div>
 
+                <!-- 🌟 표 가로 스크롤 허용 🌟 -->
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -438,6 +445,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     </main>
 </div>
 
+<!-- 🌟 푸터 (Footer) 영역 -->
 <footer class="site-footer">
     <div class="footer-content">
         <div class="footer-col">
@@ -461,6 +469,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     </div>
 </footer>
 
+<!-- 팝업창 (모달) -->
 <div id="newsModal" class="modal-overlay" onclick="closeNewsModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeNewsModal()">×</span>
@@ -641,32 +650,14 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     const rawLogs = {{ logs_json | safe }};
     let latestTime = 0;
 
-    // function parseLogDate(dateStr) {
+    // 🌟 파이썬이 던져준 YYYY/MM/DD 날짜를 완벽하게 인식하도록 수정!
+    function parseLogDate(dateStr) {
         try {
             let parts = dateStr.split(' ');
-            let ymd = parts[0].split('/'); 
-            let hm = (parts[1] || "00:00").split(':');
-            
-            let y = 2026, m = 0, d = 1;
-            
-            if (ymd.length === 3) {
-                // 연도가 포함된 정상적인 경우 (2026/06/13)
-                y = parseInt(ymd[0]);
-                m = parseInt(ymd[1]) - 1;
-                d = parseInt(ymd[2]);
-            } else if (ymd.length === 2) {
-                // 연도가 누락된 경우를 대비한 강제 2026년 주입 (06/13)
-                y = 2026;
-                m = parseInt(ymd[0]) - 1;
-                d = parseInt(ymd[1]);
-            } else {
-                return new Date(2026, 0, 1);
-            }
-            
-            let parsed = new Date(y, m, d, parseInt(hm[0]||0), parseInt(hm[1]||0));
-            if (isNaN(parsed.getTime())) return new Date(2026, 0, 1);
-            return parsed;
-        } catch(e) { return new Date(2026, 0, 1); }
+            let ymd = parts[0].split('/'); // 이제 [2026, 06, 13] 이 됩니다.
+            let hm = parts[1].split(':');
+            return new Date(parseInt(ymd[0]), parseInt(ymd[1]) - 1, parseInt(ymd[2]), parseInt(hm[0]), parseInt(hm[1]));
+        } catch(e) { return new Date(); }
     }
 
     const allLogs = rawLogs.map(log => {
@@ -868,14 +859,12 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
             let key = log.date;
             try {
                 let parts = log.date.split(' ');
-                // 🌟 차트 날짜 추출도 완벽하게 방어!
-                let datePart = parts[0];
-                if (datePart.split('/').length === 3) {
-                    datePart = datePart.split('/').slice(1).join('/'); // 2026/06/13 -> 06/13
+                if (parts.length === 2) {
+                    let datePart = parts[0].substring(5); // 🌟 차트 예쁘게 나오도록 연도 자르기 (2026/06/13 -> 06/13)
+                    let hourPart = parseInt(parts[1].split(':')[0]);
+                    let groupHour = Math.floor(hourPart / 4) * 4;
+                    key = `${datePart} ${String(groupHour).padStart(2, '0')}:00`;
                 }
-                let hourPart = parseInt(parts[1].split(':')[0]);
-                let groupHour = Math.floor(hourPart / 4) * 4;
-                key = `${datePart} ${String(groupHour).padStart(2, '0')}:00`;
             } catch(e) {}
             if (!groupedData[key]) { groupedData[key] = { sum: 0, count: 0 }; }
             groupedData[key].sum += log.unit_price;
