@@ -6,6 +6,7 @@
 <title>MOCHI MARKET & NEWS</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<!-- 🌟 깜빡임 방지: 페이지 로딩 전 다크모드 설정 불러오기 -->
 <script>
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
@@ -108,7 +109,6 @@ header { height:75px; background:var(--bg-header); backdrop-filter: blur(10px); 
 .rank-num.rank-1 { background: #ffd32a; color: #fff; box-shadow: 0 4px 10px rgba(255, 211, 42, 0.4); }
 .rank-num.rank-2 { background: #d2dae2; color: #fff; }
 .rank-num.rank-3 { background: #cd6133; color: #fff; }
-/* 💡 아이템 이름이 구겨지지 않게 word-break: keep-all 추가 */
 .rank-name { font-weight:700; font-size:14.5px; line-height: 1.3; color:var(--text-main); transition: color 0.3s; word-break: keep-all; }
 .rank-count { margin-left:auto; font-size:13px; color:var(--text-muted); font-weight: 600; white-space: nowrap; transition: color 0.3s; }
 
@@ -273,6 +273,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 <header>
     <div class="logo">🐱 모찌 소식</div>
+    <!-- 다크 모드 토글 -->
     <button id="darkModeToggle" class="theme-btn" onclick="toggleDarkMode()" title="다크 모드 전환">🌙</button>
     
     <nav class="top-nav">
@@ -284,6 +285,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
 
 <div class="layout">
     <aside class="sidebar">
+        <!-- 누적 거래 현황 -->
         <div class="side-box">
             <div class="side-title">누적 거래 현황 <span class="badge">최근 7일</span></div>
             <div class="summary-item"><span>총 거래 건수</span><strong id="summary-count">- 건</strong></div>
@@ -291,6 +293,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
             <div class="summary-item"><span>평균 거래 단가</span><strong id="summary-avg">- 원</strong></div>
         </div>
 
+        <!-- 인기 거래 TOP 10 -->
         <div class="side-box">
             <div class="side-title">🔥 인기 거래 TOP 10 <span class="badge-blue">최근 2주</span></div>
             <ul class="rank-list" id="sidebar-rank-list"></ul>
@@ -300,6 +303,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     <main>
         <div id="page-home" class="page-section active">
             
+            <!-- 슬라이드쇼 히어로 배너 -->
             <section class="hero">
                 <div id="heroSliderBg"></div>
                 <div class="hero-overlay"></div>
@@ -410,6 +414,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
                     <canvas id="searchChart"></canvas>
                 </div>
 
+                <!-- 🌟 표 가로 스크롤 허용 🌟 -->
                 <div class="table-responsive">
                     <table>
                         <thead>
@@ -440,6 +445,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     </main>
 </div>
 
+<!-- 🌟 푸터 (Footer) 영역 -->
 <footer class="site-footer">
     <div class="footer-content">
         <div class="footer-col">
@@ -463,6 +469,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     </div>
 </footer>
 
+<!-- 팝업창 (모달) -->
 <div id="newsModal" class="modal-overlay" onclick="closeNewsModal(event)">
     <div class="modal-box" onclick="event.stopPropagation()">
         <span class="modal-close" onclick="closeNewsModal()">×</span>
@@ -643,12 +650,13 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
     const rawLogs = {{ logs_json | safe }};
     let latestTime = 0;
 
+    // 🌟 파이썬이 던져준 YYYY/MM/DD 날짜를 완벽하게 인식하도록 수정!
     function parseLogDate(dateStr) {
         try {
             let parts = dateStr.split(' ');
-            let md = parts[0].split('/');
+            let ymd = parts[0].split('/'); // 이제 [2026, 06, 13] 이 됩니다.
             let hm = parts[1].split(':');
-            return new Date(2026, parseInt(md[0]) - 1, parseInt(md[1]), parseInt(hm[0]), parseInt(hm[1]));
+            return new Date(parseInt(ymd[0]), parseInt(ymd[1]) - 1, parseInt(ymd[2]), parseInt(hm[0]), parseInt(hm[1]));
         } catch(e) { return new Date(); }
     }
 
@@ -723,7 +731,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
                 html += `<div style="padding:40px; text-align:center; color:var(--text-muted); grid-column: 1 / -1; font-weight:600;">해당 카테고리의 거래 내역이 없습니다.</div>`;
             } else {
                 cats[c].forEach(item => {
-                    // 🔥 data-name으로 이름을 안전하게 숨겨서 가져가도록 수정! 🔥
                     html += `
                     <div class="item-card" onclick="goToSearch(this.getAttribute('data-name'))" data-name="${item.name}" title="클릭하여 상세 검색으로 이동">
                         <div>
@@ -759,7 +766,6 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
         } else {
             sortedItems.forEach((item, index) => {
                 let rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
-                // 🔥 랭킹도 동일하게 data-name으로 수정! 🔥
                 html += `
                 <li class="rank-item" onclick="goToSearch(this.getAttribute('data-name'))" data-name="${item.name}" title="클릭하여 상세 시세 보기">
                     <div class="rank-num ${rankClass}">${index + 1}</div>
@@ -771,21 +777,16 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
         rankList.innerHTML = html;
     }
 
-    // 🌟 버튼 한 방으로 화면이 넘어가도록 완벽 수리된 함수 🌟
     function goToSearch(itemName) {
-        // 1. 숨어있는 '시세 조회' 탭 전체를 화면에 먼저 보여줍니다.
         const marketPageBtn = document.querySelectorAll('.nav-link')[2];
         switchPage('page-market', marketPageBtn);
 
-        // 2. 그 안에서 '상세 시세 검색' 메뉴를 누른 것처럼 활성화합니다.
         const searchBtn = document.querySelectorAll('.tab-btn')[1];
         switchTab('tab-search', searchBtn);
         
-        // 3. 검색창에 아이템 이름을 넣고 검색을 시작합니다.
         document.getElementById('searchInput').value = itemName;
         searchItem();
         
-        // 4. 모바일에서도 결과가 바로 보이도록 스크롤을 살짝 내려줍니다.
         document.getElementById('page-market').scrollIntoView({ behavior: 'smooth' });
     }
 
@@ -859,7 +860,7 @@ table td { border-bottom: 1px solid var(--border-main); transition: 0.2s; }
             try {
                 let parts = log.date.split(' ');
                 if (parts.length === 2) {
-                    let datePart = parts[0];
+                    let datePart = parts[0].substring(5); // 🌟 차트 예쁘게 나오도록 연도 자르기 (2026/06/13 -> 06/13)
                     let hourPart = parseInt(parts[1].split(':')[0]);
                     let groupHour = Math.floor(hourPart / 4) * 4;
                     key = `${datePart} ${String(groupHour).padStart(2, '0')}:00`;
