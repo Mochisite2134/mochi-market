@@ -5,7 +5,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>모찌 마켓 | MOCHI MARKET & NEWS</title>
 
-<!-- Discord / KakaoTalk / SNS 링크 미리보기 설정 -->
 <meta name="description" content="모찌 서버의 실시간 아이템 시세와 기자단 소식을 한곳에서 확인하세요.">
 <link rel="canonical" href="https://www.mochiserver.kr/">
 
@@ -31,6 +30,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
+    // 화면 깜빡임 방지를 위한 테마 초기화
     const savedTheme = localStorage.getItem('theme') || 'light';
     document.documentElement.setAttribute('data-theme', savedTheme);
 </script>
@@ -38,6 +38,7 @@
 <style>
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
 
+/* 기본 설정 변수 */
 :root {
     --bg-card: rgba(255, 255, 255, 0.85);
     --bg-header: rgba(255, 255, 255, 0.9);
@@ -622,7 +623,6 @@ table thead { background: rgba(248,250,252,.78); }
     .item-card { min-height: auto; padding: 16px; }
     .item-price-box { min-width: 104px; }
 }
-
 </style>
 </head>
 <body>
@@ -881,18 +881,50 @@ table thead { background: rgba(248,250,252,.78); }
         if(searchChartInstance) updateChart();
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-        const theme = document.documentElement.getAttribute('data-theme');
-        document.getElementById('darkModeToggle').innerText = theme === 'dark' ? '☀️' : '🌙';
-    });
-
-    function switchPage(pageId, btnElement) {
+    // 🌟 뒤로가기를 위한 History API 통합 함수 🌟
+    function switchPage(pageId, btnElement, pushHistory = true) {
         document.querySelectorAll('.page-section').forEach(p => p.classList.remove('active'));
         document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
-        btnElement.classList.add('active');
+        
+        // btnElement가 없을 경우(뒤로가기 시) 해당 탭 버튼을 찾아서 활성화
+        if (!btnElement) {
+            const links = document.querySelectorAll('.nav-link');
+            if(pageId === 'page-home') btnElement = links[0];
+            else if(pageId === 'page-news') btnElement = links[1];
+            else if(pageId === 'page-market') btnElement = links[2];
+            else if(pageId === 'page-tools') btnElement = links[3];
+        }
+        if (btnElement) btnElement.classList.add('active');
+        
         window.scrollTo({ top: 0, behavior: 'smooth' }); 
+
+        // 사용자가 직접 클릭했을 때만 브라우저 방문 기록에 추가
+        if (pushHistory) {
+            history.pushState({ page: pageId }, '', '#' + pageId);
+        }
     }
+
+    // 초기 로딩 시 테마 및 뒤로가기 세팅
+    document.addEventListener("DOMContentLoaded", () => {
+        const theme = document.documentElement.getAttribute('data-theme');
+        document.getElementById('darkModeToggle').innerText = theme === 'dark' ? '☀️' : '🌙';
+
+        // 새로고침을 하거나 주소창을 치고 들어왔을 때 해당 탭 유지
+        let hash = window.location.hash.substring(1);
+        const validPages = ['page-home', 'page-news', 'page-market', 'page-tools'];
+        if (!validPages.includes(hash)) hash = 'page-home';
+        
+        history.replaceState({ page: hash }, '', '#' + hash);
+        switchPage(hash, null, false);
+    });
+
+    // 🌟 사용자가 브라우저 "뒤로가기/앞으로가기" 버튼을 눌렀을 때의 동작 감지
+    window.addEventListener('popstate', (event) => {
+        const pageId = (event.state && event.state.page) ? event.state.page : 'page-home';
+        // 뒤로가기 동작이므로 기록을 다시 쌓지 않음(false)
+        switchPage(pageId, null, false);
+    });
 
     function filterMarketList() {
         const query = document.getElementById('marketSearchInput').value.toLowerCase().trim();
@@ -920,49 +952,35 @@ table thead { background: rgba(248,250,252,.78); }
     }
 
     let bgRemovalEnginePromise = null;
-
     function setRemoverStatus(message) {
         const desc = document.querySelector('#dropZone .remover-desc');
         if (desc) desc.innerHTML = message;
     }
 
     async function loadBackgroundRemovalEngine() {
-        // 예전 bundle 방식 / 새 ESM 방식 둘 다 대응
         const globalCandidates = [
-            window.imglyRemoveBackground,
-            window.removeBackground,
+            window.imglyRemoveBackground, window.removeBackground,
             window.backgroundRemoval && window.backgroundRemoval.removeBackground,
             window.BackgroundRemoval && window.BackgroundRemoval.removeBackground
         ];
-
         for (const candidate of globalCandidates) {
             if (typeof candidate === 'function') return candidate;
             if (candidate && typeof candidate.default === 'function') return candidate.default;
         }
-
         if (!bgRemovalEnginePromise) {
             bgRemovalEnginePromise = (async () => {
-                const moduleUrls = [
-                    'https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm',
-                    'https://esm.sh/@imgly/background-removal@1.5.5'
-                ];
-
+                const moduleUrls = ['https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.5.5/+esm', 'https://esm.sh/@imgly/background-removal@1.5.5'];
                 let lastError = null;
                 for (const url of moduleUrls) {
                     try {
                         const mod = await import(url);
                         const fn = mod.default || mod.removeBackground || mod.imglyRemoveBackground;
                         if (typeof fn === 'function') return fn;
-                    } catch (error) {
-                        lastError = error;
-                        console.warn('배경 제거 엔진 로드 실패:', url, error);
-                    }
+                    } catch (error) { lastError = error; }
                 }
-
-                throw lastError || new Error('누끼 제거 AI 엔진을 불러오지 못했습니다. 인터넷 연결 또는 CDN 차단 여부를 확인해주세요.');
+                throw lastError || new Error('누끼 제거 AI 엔진을 불러오지 못했습니다.');
             })();
         }
-
         return bgRemovalEnginePromise;
     }
 
@@ -974,42 +992,29 @@ table thead { background: rgba(248,250,252,.78); }
         const defaultStatus = '클립보드에 복사된 이미지를 <strong>Ctrl + V</strong>로 바로 붙여넣어도 작동합니다.';
 
         try {
-            spinner.style.display = 'block';
-            output.style.display = 'none';
-            dlBtn.style.display = 'none';
-            setRemoverStatus('AI 엔진을 불러오는 중입니다. 첫 실행은 모델 파일 다운로드 때문에 시간이 조금 걸릴 수 있습니다.');
-
+            spinner.style.display = 'block'; output.style.display = 'none'; dlBtn.style.display = 'none';
+            setRemoverStatus('AI 엔진을 불러오는 중입니다. (첫 실행 시 다소 소요됨)');
             const removeBackground = await loadBackgroundRemovalEngine();
 
-            setRemoverStatus('이미지 배경을 제거하는 중입니다. 잠시만 기다려주세요.');
+            setRemoverStatus('이미지 배경을 제거하는 중입니다.');
             const blob = await removeBackground(file, {
                 output: { format: 'image/png', type: 'foreground' },
                 progress: (key, current, total) => {
-                    if (total) {
-                        const percent = Math.round((current / total) * 100);
-                        setRemoverStatus(`AI 모델 다운로드 중... ${percent}%`);
-                    }
+                    if (total) setRemoverStatus(`AI 모델 다운로드 중... ${Math.round((current / total) * 100)}%`);
                 }
             });
             
             const url = URL.createObjectURL(blob);
-            output.src = url;
-            output.style.display = 'block';
-            dlBtn.href = url;
-            dlBtn.download = `mochi_remover_${Date.now()}.png`;
-            dlBtn.style.display = 'inline-block';
+            output.src = url; output.style.display = 'block';
+            dlBtn.href = url; dlBtn.download = `mochi_remover_${Date.now()}.png`; dlBtn.style.display = 'inline-block';
             setRemoverStatus('완료되었습니다. 아래 버튼으로 이미지를 다운로드하세요.');
         } catch (error) {
-            console.error(error);
             setRemoverStatus(defaultStatus);
-            alert('AI 누끼 제거 중 에러 발생: ' + (error && error.message ? error.message : error));
-        } finally {
-            spinner.style.display = 'none';
-        }
+            alert('에러 발생: ' + (error.message || error));
+        } finally { spinner.style.display = 'none'; }
     }
 
     function handleFileSelect(e) { processImageForRemoval(e.target.files[0]); }
-
     window.addEventListener('paste', function(e) {
         const items = (e.clipboardData || e.originalEvent.clipboardData).items;
         for (let i = 0; i < items.length; i++) {
@@ -1044,16 +1049,11 @@ table thead { background: rgba(248,250,252,.78); }
     }
 
     const slideImages = [
-        "https://cdn.domi.kr/HvkIAqFGWYafbpxdbjVkJ28x1l0grJ.png",
-        "https://cdn.domi.kr/f4DmNmTg76L6YgGlBhbpQYuV7cPvX3.png",
-        "https://cdn.domi.kr/0ibqtkdA7uDHqe8H3bojbwmQKKOL2H.png",
-        "https://cdn.domi.kr/VyhLkavQe6VyJoW5widt8R2Q2Ki1N9.png",
-        "https://cdn.domi.kr/3mqJDSoO1wTBVNGFeaE01qQsIoHgUs.png",
-        "https://cdn.domi.kr/8bmWdJGU7nWJ8aDo29NfuNeUTNHbjU.png",
-        "https://cdn.domi.kr/KzvrJ5i975FdyIPEhpmpTlERwboUAe.png",
-        "https://cdn.domi.kr/hC8Q5cV1wK8WVxFLB5AH4cBPulXaBr.png",
-        "https://cdn.domi.kr/nJWH51ZRxTEJ1m35AfLsv3yJHCOHCX.png",
-        "https://cdn.domi.kr/WxX4lhLF05FkDfRSf6ozR5uoxEwp0W.png"
+        "https://cdn.domi.kr/HvkIAqFGWYafbpxdbjVkJ28x1l0grJ.png", "https://cdn.domi.kr/f4DmNmTg76L6YgGlBhbpQYuV7cPvX3.png",
+        "https://cdn.domi.kr/0ibqtkdA7uDHqe8H3bojbwmQKKOL2H.png", "https://cdn.domi.kr/VyhLkavQe6VyJoW5widt8R2Q2Ki1N9.png",
+        "https://cdn.domi.kr/3mqJDSoO1wTBVNGFeaE01qQsIoHgUs.png", "https://cdn.domi.kr/8bmWdJGU7nWJ8aDo29NfuNeUTNHbjU.png",
+        "https://cdn.domi.kr/KzvrJ5i975FdyIPEhpmpTlERwboUAe.png", "https://cdn.domi.kr/hC8Q5cV1wK8WVxFLB5AH4cBPulXaBr.png",
+        "https://cdn.domi.kr/nJWH51ZRxTEJ1m35AfLsv3yJHCOHCX.png", "https://cdn.domi.kr/WxX4lhLF05FkDfRSf6ozR5uoxEwp0W.png"
     ];
 
     function initHeroSlider() {
@@ -1142,7 +1142,6 @@ table thead { background: rgba(248,250,252,.78); }
         } catch (error) { alert("오류가 발생했습니다: " + error); }
     }
 
-    // 🌟 파이썬 데이터 매핑: 파이썬이 던져준 카테고리를 100% 무조건 신뢰하고 적용합니다!
     const rawLogs = {{ logs_json | safe }};
     let latestTime = 0;
     const SIX_MONTHS = 180 * 24 * 60 * 60 * 1000;
@@ -1153,16 +1152,19 @@ table thead { background: rgba(248,250,252,.78); }
             let parts = dateStr.split(' '); 
             let ymd = parts[0].split('/'); 
             let hm = (parts[1] || "00:00").split(':');
-            
             let y = 2026, m = 0, d = 1;
-            if (ymd.length === 3) {
-                y = parseInt(ymd[0]); m = parseInt(ymd[1]) - 1; d = parseInt(ymd[2]);
-            }
+            if (ymd.length === 3) { y = parseInt(ymd[0]); m = parseInt(ymd[1]) - 1; d = parseInt(ymd[2]); }
             let parsed = new Date(y, m, d, parseInt(hm[0]||0), parseInt(hm[1]||0));
-            if (isNaN(parsed.getTime())) return new Date(2026, 5, 1);
-            return parsed;
+            return isNaN(parsed.getTime()) ? new Date(2026, 5, 1) : parsed;
         } catch(e) { return new Date(2026, 5, 1); }
     }
+
+    const CATEGORY_VISUALS = {
+        '차량': { icon: '🚗', label: '차량' }, '스킨': { icon: '👕', label: '스킨' },
+        '의자': { icon: '🪑', label: '의자' }, '치장': { icon: '✨', label: '치장' },
+        '티켓': { icon: '🎟️', label: '티켓' }, '조각/재료': { icon: '🧩', label: '조각/재료' },
+        '시즌 상품': { icon: '🎁', label: '시즌 상품' }, '기타': { icon: '📦', label: '기타' }
+    };
 
     const allLogs = rawLogs.map(log => {
         let t = parseLogDate(log.date).getTime();
@@ -1170,47 +1172,31 @@ table thead { background: rgba(248,250,252,.78); }
 
         let originalName = log.name;
         let cat = log.category || '기타';
-        const categoryPrefixMap = {
-            '차량': '[🚗] ',
-            '스킨': '[👕] ',
-            '의자': '[🪑] ',
-            '치장': '[✨] ',
-            '티켓': '[🎟️] ',
-            '조각/재료': '[🧩] ',
-            '시즌 상품': '[🎁] ',
-            '기타': '[📦] '
-        };
-        let prefix = categoryPrefixMap[cat] || '[📦] ';
+        let prefix = (CATEGORY_VISUALS[cat] || {icon:'📦'}).icon + ' ';
 
-        let cleanName = originalName.replace(/\[.*?\]/g, '').replace(/【.*?】/g, '').replace(/<.*?>/g, '').replace(/스킨박스#/g, '').replace(/차량박스#/g, '').replace(/치장박스#/g, '').replace(/의자박스#/g, '').replace(/아이템박스#/g, '').replace(/일반아이템박스#/g, '').replace(/시즌상품박스#/g, '').replace(/[🚗👕🧸🪑✨📦🧩🎫🎟🎁🎣]/g, '').trim();
+        let cleanName = originalName.replace(/\[.*?\]/g, '').replace(/【.*?】/g, '').replace(/<.*?>/g, '')
+            .replace(/스킨박스#/g, '').replace(/차량박스#/g, '').replace(/치장박스#/g, '')
+            .replace(/의자박스#/g, '').replace(/아이템박스#/g, '').replace(/일반아이템박스#/g, '')
+            .replace(/시즌상품박스#/g, '').replace(/[🚗👕🧸🪑✨📦🧩🎫🎟🎁🎣]/g, '').trim();
         if (!cleanName) cleanName = originalName.replace(/\[.*?\]/g, '').trim() || originalName;
 
         return { ...log, original_name: originalName, name: prefix + cleanName, category: cat, timestamp: t };
     });
 
     function renderSummary() {
-        let totalCount = 0;
-        let totalValue = 0;
-        let sumUnitPrice = 0; 
-        
+        let totalCount = 0, totalValue = 0, sumUnitPrice = 0; 
         allLogs.forEach(log => {
             if (latestTime - log.timestamp <= SIX_MONTHS) {
-                totalCount++;
-                totalValue += log.total_price;
-                sumUnitPrice += log.unit_price; 
+                totalCount++; totalValue += log.total_price; sumUnitPrice += log.unit_price; 
             }
         });
-
-        let avgValue = totalCount > 0 ? Math.floor(sumUnitPrice / totalCount) : 0;
         document.getElementById('summary-count').innerText = totalCount.toLocaleString() + ' 건';
         document.getElementById('summary-value').innerText = formatKRW(totalValue);
-        document.getElementById('summary-avg').innerText = formatKRW(avgValue);
+        document.getElementById('summary-avg').innerText = formatKRW(totalCount > 0 ? Math.floor(sumUnitPrice / totalCount) : 0);
     }
 
     function renderTop10() {
-        const rankList = document.getElementById('sidebar-rank-list');
         let stats = {};
-        
         allLogs.forEach(log => {
             if (latestTime - log.timestamp <= FOURTEEN_DAYS) {
                 if(!stats[log.name]) stats[log.name] = { count: 0 };
@@ -1219,73 +1205,34 @@ table thead { background: rgba(248,250,252,.78); }
         });
         
         let sortedItems = Object.keys(stats).map(name => ({name: name, count: stats[name].count}))
-                                            .sort((a, b) => b.count - a.count)
-                                            .slice(0, 10);
+            .sort((a, b) => b.count - a.count).slice(0, 10);
         
-        let html = '';
-        if(sortedItems.length === 0) {
-            html = '<li style="text-align:center; color:var(--text-muted); padding:20px; font-weight:600;">최근 2주간 거래 내역이 없습니다.</li>';
-        } else {
-            sortedItems.forEach((item, index) => {
+        let html = sortedItems.length === 0 
+            ? '<li style="text-align:center; color:var(--text-muted); padding:20px; font-weight:600;">최근 2주간 거래 내역이 없습니다.</li>'
+            : sortedItems.map((item, index) => {
                 let rankClass = index === 0 ? 'rank-1' : index === 1 ? 'rank-2' : index === 2 ? 'rank-3' : '';
-                html += `
-                <li class="rank-item" onclick="goToSearch(this.getAttribute('data-name'))" data-name="${item.name}" title="클릭하여 상세 시세 보기">
+                return `<li class="rank-item" onclick="goToSearch(this.getAttribute('data-name'))" data-name="${item.name}" title="클릭하여 상세 시세 보기">
                     <div class="rank-num ${rankClass}">${index + 1}</div>
                     <div class="rank-name">${item.name}</div>
                     <div class="rank-count">거래 ${item.count}건</div>
                 </li>`;
-            });
-        }
-        rankList.innerHTML = html;
+            }).join('');
+        document.getElementById('sidebar-rank-list').innerHTML = html;
     }
 
     function escapeHTML(value) {
-        return String(value ?? '')
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+        return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#039;');
     }
-
-    function stripCategoryPrefix(name) {
-        return String(name || '').replace(/^\[[^\]]+\]\s*/g, '').trim();
-    }
-
-    function hashText(text) {
-        let hash = 0;
-        const str = String(text || 'mochi');
-        for (let i = 0; i < str.length; i++) hash = ((hash << 5) - hash) + str.charCodeAt(i), hash |= 0;
-        return Math.abs(hash);
-    }
-
-
-    const CATEGORY_VISUALS = {
-        '차량': { icon: '🚗', label: '차량' },
-        '스킨': { icon: '👕', label: '스킨' },
-        '의자': { icon: '🪑', label: '의자' },
-        '치장': { icon: '✨', label: '치장' },
-        '티켓': { icon: '🎟️', label: '티켓' },
-        '조각/재료': { icon: '🧩', label: '조각/재료' },
-        '시즌 상품': { icon: '🎁', label: '시즌 상품' },
-        '기타': { icon: '📦', label: '기타' }
-    };
-
-    function getCategoryVisual(category) {
-        return CATEGORY_VISUALS[category] || CATEGORY_VISUALS['기타'];
-    }
+    function stripCategoryPrefix(name) { return String(name || '').replace(/^\[[^\]]+\]\s*/g, '').trim(); }
 
     function updateCategoryBadges(cats) {
         const activeCat = document.querySelector('#tab-list .cat-btn.active')?.getAttribute('data-cat') || '차량';
         document.querySelectorAll('.market-category-tabs .cat-btn').forEach(btn => {
             const cat = btn.getAttribute('data-cat');
-            const count = cats[cat] ? cats[cat].length : 0;
-            const small = btn.querySelector('small');
-            if (small) small.innerText = count.toLocaleString();
+            if(btn.querySelector('small')) btn.querySelector('small').innerText = (cats[cat] ? cats[cat].length : 0).toLocaleString();
         });
-        const v = CATEGORY_VISUALS[activeCat] || CATEGORY_VISUALS['기타'];
         const title = document.getElementById('activeCategoryTitle');
-        if (title) title.innerText = `${v.icon} ${activeCat} 시세`;
+        if (title) title.innerText = `${(CATEGORY_VISUALS[activeCat] || {icon:'📦'}).icon} ${activeCat} 시세`;
     }
 
     function renderCategories() {
@@ -1293,67 +1240,42 @@ table thead { background: rgba(248,250,252,.78); }
         let stats = {};
         allLogs.forEach(log => {
             if(!stats[log.name]) stats[log.name] = { count: 0, sum: 0, category: log.category };
-            stats[log.name].count += 1;
-            stats[log.name].sum += log.unit_price;
+            stats[log.name].count += 1; stats[log.name].sum += log.unit_price;
         });
 
         const categoryOrder = ['차량', '스킨', '의자', '치장', '티켓', '조각/재료', '시즌 상품', '기타'];
-        let cats = {};
-        categoryOrder.forEach(c => cats[c] = []);
+        let cats = Object.fromEntries(categoryOrder.map(c => [c, []]));
 
         for(let name in stats) {
             let avg = Math.floor(stats[name].sum / stats[name].count);
-            let obj = {
-                name: name,
-                cleanName: stripCategoryPrefix(name),
-                count: stats[name].count,
-                avgRaw: avg,
-                avg_price: formatKRW(avg),
-                category: stats[name].category
-            };
-            if(cats[stats[name].category]) cats[stats[name].category].push(obj);
-            else cats['기타'].push(obj);
+            cats[stats[name].category ? stats[name].category : '기타'].push({
+                name: name, cleanName: stripCategoryPrefix(name), count: stats[name].count,
+                avgRaw: avg, avg_price: formatKRW(avg), category: stats[name].category
+            });
         }
 
         const sortMode = document.getElementById('marketSort')?.value || 'count';
-        categoryOrder.forEach(c => cats[c].sort((a,b) => {
-            if (sortMode === 'price') return b.avgRaw - a.avgRaw;
-            if (sortMode === 'name') return a.cleanName.localeCompare(b.cleanName, 'ko');
-            return b.count - a.count;
-        }));
+        categoryOrder.forEach(c => cats[c].sort((a,b) => sortMode === 'price' ? b.avgRaw - a.avgRaw : sortMode === 'name' ? a.cleanName.localeCompare(b.cleanName, 'ko') : b.count - a.count));
 
-        let html = '';
-        categoryOrder.forEach(c => {
-            const visual = CATEGORY_VISUALS[c] || CATEGORY_VISUALS['기타'];
-            html += `<div id="cat-${c}" class="cat-content ${c === '차량' ? 'active' : ''}">`;
+        let html = categoryOrder.map(c => {
+            let catHtml = `<div id="cat-${c}" class="cat-content ${c === '차량' ? 'active' : ''}">`;
             if(cats[c].length === 0) {
-                html += `<div style="padding:56px 20px; text-align:center; color:var(--text-muted); grid-column: 1 / -1; font-weight:800; background:var(--surface-solid); border:1px solid var(--line); border-radius:22px;">${visual.icon}<br>해당 카테고리의 거래 내역이 없습니다.</div>`;
+                catHtml += `<div style="padding:56px 20px; text-align:center; color:var(--text-muted); grid-column: 1 / -1; font-weight:800; background:var(--surface-solid); border:1px solid var(--line); border-radius:22px;">${(CATEGORY_VISUALS[c] || {icon:'📦'}).icon}<br>해당 카테고리의 거래 내역이 없습니다.</div>`;
             } else {
-                cats[c].forEach(item => {
-                    const v = getCategoryVisual(c);
-                    const safeName = escapeHTML(item.name);
-                    const safeAttr = escapeHTML(item.name);
-                    html += `
-                    <div class="item-card" onclick="goToSearch(this.getAttribute('data-name'))" data-name="${safeAttr}" title="클릭하여 상세 검색으로 이동">
-                        <div class="item-left">
-                            <div class="item-icon" aria-hidden="true">${v.icon}</div>
-                            <div class="item-main">
-                                <div class="i-name">${safeName}</div>
-                                <div class="item-meta">
-                                    <span>${escapeHTML(c)}</span>
-                                    <span>총 ${item.count.toLocaleString()}번 거래</span>
-                                </div>
-                            </div>
+                catHtml += cats[c].map(item => `
+                <div class="item-card" onclick="goToSearch(this.getAttribute('data-name'))" data-name="${escapeHTML(item.name)}" title="상세 검색">
+                    <div class="item-left">
+                        <div class="item-icon" aria-hidden="true">${(CATEGORY_VISUALS[c] || {icon:'📦'}).icon}</div>
+                        <div class="item-main">
+                            <div class="i-name">${escapeHTML(item.name)}</div>
+                            <div class="item-meta"><span>${escapeHTML(c)}</span><span>총 ${item.count.toLocaleString()}번 거래</span></div>
                         </div>
-                        <div class="item-price-box">
-                            <span>평균가</span>
-                            <div class="i-price">${item.avg_price}</div>
-                        </div>
-                    </div>`;
-                });
+                    </div>
+                    <div class="item-price-box"><span>평균가</span><div class="i-price">${item.avg_price}</div></div>
+                </div>`).join('');
             }
-            html += `</div>`;
-        });
+            return catHtml + `</div>`;
+        }).join('');
         container.innerHTML = html;
         updateCategoryBadges(cats);
     }
@@ -1363,35 +1285,29 @@ table thead { background: rgba(248,250,252,.78); }
         switchPage('page-market', marketPageBtn);
         const searchBtn = document.querySelectorAll('.tab-btn')[1];
         switchTab('tab-search', searchBtn);
-        document.getElementById('searchInput').value = stripCategoryPrefix(itemName); // 앞의 카테고리 이모지 제거 후 검색
+        document.getElementById('searchInput').value = stripCategoryPrefix(itemName);
         searchItem();
         document.getElementById('page-market').scrollIntoView({ behavior: 'smooth' });
     }
 
-    let searchChartInstance = null;
-    let currentFilteredLogs = []; 
-    let currentPeriodDays = 7;    
+    let searchChartInstance = null, currentFilteredLogs = [], currentPeriodDays = 7;    
 
     function searchItem() {
         const keyword = document.getElementById('searchInput').value.toLowerCase().trim();
         const tbody = document.getElementById('searchResultBody');
         const filterArea = document.getElementById('periodFilterArea');
         const chartArea = document.getElementById('searchChartArea');
-        
         if (!keyword) return;
 
-        currentFilteredLogs = allLogs.filter(log => log.name.toLowerCase().includes(keyword) || log.original_name.toLowerCase().includes(keyword))
-                                     .sort((a, b) => a.timestamp - b.timestamp);
+        currentFilteredLogs = allLogs.filter(log => log.name.toLowerCase().includes(keyword) || log.original_name.toLowerCase().includes(keyword)).sort((a, b) => a.timestamp - b.timestamp);
 
         if (currentFilteredLogs.length === 0) {
             tbody.innerHTML = '<tr><td colspan="7" style="padding:40px; text-align:center; color:var(--text-muted); font-size: 15px; font-weight: 600;">검색된 내역이 없습니다.</td></tr>';
-            filterArea.style.display = "none";
-            chartArea.style.display = "none";
+            filterArea.style.display = "none"; chartArea.style.display = "none";
             return;
         }
 
         filterArea.style.display = "flex";
-        
         document.querySelectorAll('#periodFilterArea .cat-btn').forEach(b => b.classList.remove('active'));
         document.getElementById('btn-period-week').classList.add('active');
         changePeriod(7, document.getElementById('btn-period-week'));
@@ -1404,34 +1320,25 @@ table thead { background: rgba(248,250,252,.78); }
         
         const limitTime = currentPeriodDays * 24 * 60 * 60 * 1000; 
         let periodLogs = currentFilteredLogs.filter(log => (latestTime - log.timestamp) <= limitTime);
-        
-        renderSearchTable(periodLogs); 
-        renderSearchChart(periodLogs); 
+        renderSearchTable(periodLogs); renderSearchChart(periodLogs); 
     }
 
     function renderSearchTable(logs) {
         const tbody = document.getElementById('searchResultBody');
         if (logs.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" style="padding:40px; text-align:center; color:var(--text-muted); font-size: 15px; font-weight: 600;">선택하신 기간 내에는 거래 내역이 없습니다.</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="7" style="padding:40px; text-align:center; color:var(--text-muted); font-size: 15px; font-weight: 600;">선택하신 기간 내 거래 내역이 없습니다.</td></tr>';
             return;
         }
-
-        let html = '';
-        [...logs].reverse().forEach(log => {
-            let displayDate = log.date.length > 10 ? log.date.substring(5) : log.date;
-            html += `
-                <tr style="border-bottom:1px solid var(--border-main); transition:0.2s;" onmouseover="this.style.backgroundColor='var(--bg-hover-table)'" onmouseout="this.style.backgroundColor='transparent'">
-                    <td style="color:var(--text-muted); font-size:13.5px; font-weight:600;">${displayDate}</td>
-                    <td style="font-weight:800; color:var(--text-main);">${log.name}</td>
-                    <td style="font-weight:600; color:var(--text-sub);">${log.qty.toLocaleString()}개</td>
-                    <td style="color:var(--pink-main); font-weight:800;">${formatKRW(log.unit_price)}</td>
-                    <td style="font-weight:800; color:var(--text-main);">${formatKRW(log.total_price)}</td>
-                    <td style="color:var(--pink-main); font-weight:700;">${log.seller}</td>
-                    <td style="color:var(--blue-main); font-weight:700;">${log.buyer}</td>
-                </tr>
-            `;
-        });
-        tbody.innerHTML = html;
+        tbody.innerHTML = [...logs].reverse().map(log => `
+            <tr style="border-bottom:1px solid var(--border-main); transition:0.2s;" onmouseover="this.style.backgroundColor='var(--bg-hover-table)'" onmouseout="this.style.backgroundColor='transparent'">
+                <td style="color:var(--text-muted); font-size:13.5px; font-weight:600;">${log.date.length > 10 ? log.date.substring(5) : log.date}</td>
+                <td style="font-weight:800; color:var(--text-main);">${log.name}</td>
+                <td style="font-weight:600; color:var(--text-sub);">${log.qty.toLocaleString()}개</td>
+                <td style="color:var(--pink-main); font-weight:800;">${formatKRW(log.unit_price)}</td>
+                <td style="font-weight:800; color:var(--text-main);">${formatKRW(log.total_price)}</td>
+                <td style="color:var(--pink-main); font-weight:700;">${log.seller}</td>
+                <td style="color:var(--blue-main); font-weight:700;">${log.buyer}</td>
+            </tr>`).join('');
     }
 
     function renderSearchChart(logs) {
@@ -1444,13 +1351,11 @@ table thead { background: rgba(248,250,252,.78); }
             try {
                 let parts = log.date.split(' ');
                 let datePart = parts[0].split('/').length === 3 ? parts[0].split('/').slice(1).join('/') : parts[0];
-                let hourPart = parseInt(parts[1].split(':')[0]);
-                let groupHour = Math.floor(hourPart / 4) * 4;
+                let groupHour = Math.floor(parseInt(parts[1].split(':')[0]) / 4) * 4;
                 key = `${datePart} ${String(groupHour).padStart(2, '0')}:00`;
             } catch(e) {}
-            if (!groupedData[key]) { groupedData[key] = { sum: 0, count: 0 }; }
-            groupedData[key].sum += log.unit_price;
-            groupedData[key].count += 1;
+            if (!groupedData[key]) groupedData[key] = { sum: 0, count: 0 };
+            groupedData[key].sum += log.unit_price; groupedData[key].count += 1;
         });
 
         let chartLabels = Object.keys(groupedData);
@@ -1463,7 +1368,6 @@ table thead { background: rgba(248,250,252,.78); }
         const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
         const gridColor = isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.05)';
         const tickColor = isDark ? '#94a3b8' : '#a4b0be';
-
         let periodLabel = currentPeriodDays === 1 ? '일간' : currentPeriodDays === 7 ? '주간' : currentPeriodDays === 30 ? '월간' : '전체 기간';
 
         searchChartInstance = new Chart(ctx, {
@@ -1471,10 +1375,7 @@ table thead { background: rgba(248,250,252,.78); }
             data: {
                 labels: chartLabels,
                 datasets: [{
-                    label: `${periodLabel} 평균 단가 흐름`,
-                    data: chartPrices,
-                    borderColor: '#ff6ba6',
-                    backgroundColor: 'rgba(255, 107, 166, 0.15)',
+                    label: `${periodLabel} 평균 단가 흐름`, data: chartPrices, borderColor: '#ff6ba6', backgroundColor: 'rgba(255, 107, 166, 0.15)',
                     borderWidth: 3, fill: true, tension: 0.3, pointRadius: chartLabels.length > 30 ? 0 : 6, pointBackgroundColor: '#fff', pointBorderColor: '#ff6ba6', pointBorderWidth: 2
                 }]
             },
@@ -1492,7 +1393,6 @@ table thead { background: rgba(248,250,252,.78); }
     let mainChartInstance = null;
     function renderMainChart() {
         let monthlyStats = {};
-        
         allLogs.forEach(log => {
             if (latestTime - log.timestamp <= SIX_MONTHS) {
                 let d = new Date(log.timestamp);
@@ -1511,17 +1411,7 @@ table thead { background: rgba(248,250,252,.78); }
 
         mainChartInstance = new Chart(mainCtx, {
             type: 'bar',
-            data: {
-                labels: chartLabels,
-                datasets: [{
-                    label: '월별 총 거래액',
-                    data: chartData,
-                    backgroundColor: 'rgba(255, 107, 166, 0.8)',
-                    hoverBackgroundColor: '#ff6ba6',
-                    borderRadius: 10,
-                    barPercentage: 0.5
-                }]
-            },
+            data: { labels: chartLabels, datasets: [{ label: '월별 총 거래액', data: chartData, backgroundColor: 'rgba(255, 107, 166, 0.8)', hoverBackgroundColor: '#ff6ba6', borderRadius: 10, barPercentage: 0.5 }] },
             options: {
                 responsive: true, maintainAspectRatio: false,
                 plugins: { tooltip: { backgroundColor: 'rgba(45, 52, 54, 0.9)', titleFont: {size:14}, bodyFont: {size:15, weight:'bold'}, callbacks: { label: function(c) { return formatKRW(c.raw); } } } },
@@ -1534,11 +1424,7 @@ table thead { background: rgba(248,250,252,.78); }
     }
 
     window.onload = function() {
-        initHeroSlider(); 
-        renderSummary(); 
-        renderTop10(); 
-        renderCategories(); 
-        renderMainChart();
+        initHeroSlider(); renderSummary(); renderTop10(); renderCategories(); renderMainChart();
     };
 </script>
 </body>
