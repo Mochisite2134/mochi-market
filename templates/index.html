@@ -619,12 +619,46 @@
         '시즌 상품': { icon: '🎁', label: '시즌 상품' }, '기타': { icon: '📦', label: '기타' }
     };
 
-    const allLogs = rawLogs.map(log => {
+    // 💡 [수정된 부분] 유저가 원하지 않는 아이템을 완전히 삭제하고 알맞은 카테고리로 분류합니다.
+    const allLogs = rawLogs.filter(log => {
+        const excludeCheck = log.name.replace(/\s/g, '');
+        const excludeKeywords = ['개인차량', '개인스킨', '개인킬피드', '개인채팅칭호', '개인칭호'];
+        return !excludeKeywords.some(keyword => excludeCheck.includes(keyword));
+    }).map(log => {
         let t = parseLogDate(log.date).getTime();
         if(t > latestTime) latestTime = t;
 
         let originalName = log.name;
-        let cat = log.category || '기타';
+        let cat = log.category; 
+
+        if (!cat || cat === '기타') {
+            const nameCheck = originalName.toLowerCase().replace(/\s/g, ''); 
+
+            const etcList = ['차량포장키트', '스킨포장키트', '섬낚시가방5일권', '철광석', '전구', '양말', '구리광석', '비료', '사탕', '별', '물통', '은광석', '강요한이좋아하는강철용', '머신피스톨부품도', '광산조각부품도', '좀비존킬피드'];
+            const vehicleList = ['보네노', '맥스', '변기카', '닌자커스텀', '던', '웰시코기카', '텐알', '레고카', '썰매', 'x80데빌헌터led', '식빵고양이', '레이싱카', '시론', 'gtr-9', '레고슈나', 'x80데빌헌터', '피에로', '레이저', 'f80', '블랙샤크', '킥보드', '닌자', '스즈키', '오르자gt', '씌비알500', '용암비전', '아방타드르', '환다gx', '이브이6', '알파로메오', '그랜절', '스뽀티지', '푸지비전', '케칠', '볼라투스'];
+            const seasonList = ['야메로좀비존킬피드', '광산매니아'];
+
+            if (etcList.some(v => nameCheck.includes(v))) {
+                cat = '기타';
+            } else if (nameCheck.includes('차량') || vehicleList.some(v => nameCheck.includes(v))) {
+                cat = '차량';
+            } else if (nameCheck.includes('시즌') || nameCheck.includes('빙고') || seasonList.some(v => nameCheck.includes(v))) {
+                cat = '시즌 상품';
+            } else if (nameCheck.includes('스킨') || nameCheck.includes('방탄복')) {
+                cat = '스킨';
+            } else if (nameCheck.includes('의자')) {
+                cat = '의자';
+            } else if (nameCheck.includes('치장') || nameCheck.includes('칭호')) {
+                cat = '치장';
+            } else if (nameCheck.includes('티켓') || nameCheck.includes('입장권') || nameCheck.includes('분해권')) {
+                cat = '티켓';
+            } else if (nameCheck.includes('조각') || nameCheck.includes('재료') || nameCheck.includes('진통제') || nameCheck.includes('대마초') || nameCheck.includes('바이러스')) {
+                cat = '조각/재료';
+            } else {
+                cat = '기타';
+            }
+        }
+
         let prefix = (CATEGORY_VISUALS[cat] || {icon:'📦'}).icon + ' ';
 
         let cleanName = originalName.replace(/\[.*?\]/g, '').replace(/【.*?】/g, '').replace(/<.*?>/g, '')
